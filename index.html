@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prism | StockPro Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-deep: #0f1113; --bg-surface: #181c20;
+            --prism-cyan: #26c4ca; --prism-red: #ff5c5c;
+            --text-dim: #828d95; --text-bright: #e1e4e8;
+            --sidebar-w: 260px;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text-bright); margin: 0; }
+        
+        /* Sidebar Styling */
+        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; background: var(--bg-surface); border-right: 1px solid #2b3035; padding: 2.5rem 1.5rem; }
+        .nav-group { margin-bottom: 2rem; }
+        .nav-label { font-size: 0.65rem; color: #4b545c; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+        .nav-item { display: flex; align-items: center; color: var(--text-dim); text-decoration: none; padding: 8px 0; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
+        .nav-item i { margin-right: 12px; font-size: 1.2rem; }
+        .nav-item:hover, .nav-item.active { color: var(--prism-cyan); }
+        
+        /* Main Viewport */
+        .prism-viewport { margin-left: var(--sidebar-w); padding: 3.5rem; }
+        
+        /* Card & Table Styling */
+        .unit-card { background: var(--bg-surface); border: 1px solid #2b3035; border-radius: 6px; padding: 1.5rem 2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; }
+        .status-led { width: 10px; height: 10px; border-radius: 50%; margin-right: 20px; }
+        .led-cyan { background: var(--prism-cyan); box-shadow: 0 0 10px var(--prism-cyan); }
+        .led-red { background: var(--prism-red); box-shadow: 0 0 10px var(--prism-red); }
+        .unit-identity { min-width: 200px; }
+        .unit-title { font-weight: 600; font-size: 1.1rem; }
+        .unit-badge { font-size: 0.65rem; color: var(--text-dim); background: #000; padding: 2px 6px; border-radius: 3px; font-weight: 700; text-transform: uppercase; }
+        .metric-wrap { display: flex; gap: 3rem; }
+        .m-head { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
+        .m-body { font-family: 'JetBrains Mono', monospace; }
+        
+        .prism-btn { background: transparent; color: var(--prism-cyan); border: 1px solid rgba(38,196,202,0.3); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 4px; text-transform: uppercase; transition: 0.2s; }
+        .prism-btn:hover { background: var(--prism-cyan); color: #000; }
+        .prism-btn.withdraw { color: var(--prism-red); border-color: rgba(255, 92, 92, 0.3); }
+        .prism-btn.withdraw:hover { background: var(--prism-red); color: #000; }
+        .admin-controls { text-align: right; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: #2b3035; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<aside class="prism-sidebar">
+    <div style="color:var(--prism-cyan); font-size:1.6rem; font-weight:700; margin-bottom:3.5rem;">
+        <i class="ph ph-cube-fill me-2"></i> PRISM
+    </div>
+    
+    <div class="nav-group">
+        <div class="nav-label">Core Systems</div>
+        <a class="nav-item active" onclick="loadModule('products', this)"><i class="ph ph-cpu"></i> Products</a>
+        <a class="nav-item" onclick="loadModule('categories', this)"><i class="ph ph-tag"></i> Categories</a>
+        <a class="nav-item" onclick="loadModule('transactions', this)"><i class="ph ph-arrows-left-right"></i> Transactions</a>
+    </div>
+
+    <div class="nav-group">
+        <div class="nav-label">Management</div>
+        <a class="nav-item" onclick="loadModule('suppliers', this)"><i class="ph ph-users-three"></i> Suppliers</a>
+        <a class="nav-item"><i class="ph ph-gear"></i> Settings</a>
+    </div>
+</aside>
+
+<main class="prism-viewport">
+    <header class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <h2 id="module-title">Project Argo: PRODUCTS</h2>
+            <p>Admin: THOMAS P. // Status: <span id="api-status">ONLINE</span></p>
+        </div>
+        <button class="prism-btn" onclick="location.reload()">System Reset</button>
+    </header>
+    
+    <div id="prismContainer"></div>
+</main>
+
+<script>
+    async function loadModule(action, element) {
+        const status = document.getElementById('api-status');
+        const container = document.getElementById('prismContainer');
+        const title = document.getElementById('module-title');
+        
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        if(element) element.classList.add('active');
+        
+        title.innerText = `Project Argo: ${action.toUpperCase()}`;
+        status.innerText = "POLLING API...";
+
+        try {
+            const res = await fetch(`api.php?action=${action}`);
+            const data = await res.json();
+            
+            if (data.error) throw new Error(data.error);
+            container.innerHTML = ''; 
+
+            if (action === 'products') {
+                renderProducts(data);
+            } else {
+                renderTable(data);
+            }
+            status.innerText = "ONLINE";
+        } catch (err) {
+            status.innerText = "BRIDGE FAILED";
+            container.innerHTML = `<div class="text-danger">SYSTEM HALT: ${err.message}</div>`;
+        }
+    }
+
+    async function manage(type, id) {
+        const qty = prompt(`Enter quantity to ${type === 'IN' ? 'Add' : 'Withdraw'}:`);
+        if (!qty || isNaN(qty) || qty <= 0) return;
+
+        const status = document.getElementById('api-status');
+        status.innerText = "PROCESSING...";
+
+        try {
+            const formData = new FormData();
+            formData.append('Product_id', id);
+            formData.append('Transaction_qty', qty);
+            formData.append('Transaction_type', type);
+
+            const res = await fetch('process.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await res.json();
+            if (result.status === 'success') {
+                loadModule('products'); 
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (err) {
+            alert("Connection to process.php failed.");
+            status.innerText = "BRIDGE FAILED";
+        }
+    }
+
+    function renderProducts(data) {
+        const container = document.getElementById('prismContainer');
+        container.innerHTML = ''; 
+        
+        data.forEach(item => {
+            const catName = item.Category_name || "General Assets"; 
+            const low = parseInt(item.Stock_qty) < 10;
+            
+            container.innerHTML += `
+                <div class="unit-card">
+                    <div class="d-flex align-items-center">
+                        <div class="status-led ${low ? 'led-red' : 'led-cyan'}"></div>
+                        <div class="unit-identity">
+                            <div class="unit-title">${item.product_name}</div>
+                            <span class="unit-badge">${catName}</span>
+                        </div>
+                    </div>
+                    <div class="metric-wrap">
+                        <div>
+                            <div class="m-head">Revision</div>
+                            <div class="m-body">P00${item.Product_id}</div>
+                        </div>
+                        <div>
+                            <div class="m-head">Objects</div>
+                            <div class="m-body fw-bold text-white">${item.Stock_qty}</div>
+                        </div>
+                    </div>
+                    <div class="admin-controls d-flex gap-2">
+                        <div class="cost-display m-body me-3">₱${parseFloat(item.Unit_price).toLocaleString()}</div>
+                        <button class="prism-btn" onclick="manage('IN', ${item.Product_id})">Add</button>
+                        <button class="prism-btn withdraw" onclick="manage('OUT', ${item.Product_id})">Withdraw</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function renderTable(data) {
+        const container = document.getElementById('prismContainer');
+        if (!data || data.length === 0) { 
+            container.innerHTML = "<p class='text-dim'>No records found in this sector.</p>"; 
+            return; 
+        }
+        
+        let tableHTML = `<div class="table-responsive">
+            <table class="table table-dark table-hover border-secondary" style="font-size:0.9rem;">
+                <thead><tr>`;
+        
+        Object.keys(data[0]).forEach(key => {
+            tableHTML += `<th class="text-dim text-uppercase" style="font-size:0.7rem;">${key.replace('_', ' ')}</th>`;
+        });
+        
+        tableHTML += `</tr></thead><tbody>`;
+        
+        data.forEach(row => {
+            tableHTML += `<tr>`;
+            Object.values(row).forEach(val => {
+                tableHTML += `<td class="py-3 m-body">${val}</td>`;
+            });
+            tableHTML += `</tr>`;
+        });
+        
+        tableHTML += `</tbody></table></div>`;
+        container.innerHTML = tableHTML;
+    }
+
+    window.onload = () => loadModule('products', document.querySelector('.nav-item.active'));
+</script>
+</body>
+</html>
