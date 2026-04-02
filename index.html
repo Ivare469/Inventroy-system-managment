@@ -6,43 +6,76 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --bg-deep: #0f1113; --bg-surface: #181c20;
             --prism-cyan: #26c4ca; --prism-red: #ff5c5c;
+            --prism-green: #4caf88; --prism-amber: #f5a623;
             --text-dim: #828d95; --text-bright: #e1e4e8;
             --sidebar-w: 260px;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text-bright); margin: 0; }
-        
-        /* Sidebar Styling */
-        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; background: var(--bg-surface); border-right: 1px solid #2b3035; padding: 2.5rem 1.5rem; }
+
+        /* Sidebar */
+        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; background: var(--bg-surface); border-right: 1px solid #2b3035; padding: 2.5rem 1.5rem; overflow-y: auto; }
         .nav-group { margin-bottom: 2rem; }
         .nav-label { font-size: 0.65rem; color: #4b545c; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
         .nav-item { display: flex; align-items: center; color: var(--text-dim); text-decoration: none; padding: 8px 0; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
         .nav-item i { margin-right: 12px; font-size: 1.2rem; }
         .nav-item:hover, .nav-item.active { color: var(--prism-cyan); }
-        
-        /* Main Viewport */
+
+        /* Main */
         .prism-viewport { margin-left: var(--sidebar-w); padding: 3.5rem; }
-        
-        /* Card & Table Styling */
-        .unit-card { background: var(--bg-surface); border: 1px solid #2b3035; border-radius: 6px; padding: 1.5rem 2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; }
-        .status-led { width: 10px; height: 10px; border-radius: 50%; margin-right: 20px; }
-        .led-cyan { background: var(--prism-cyan); box-shadow: 0 0 10px var(--prism-cyan); }
-        .led-red { background: var(--prism-red); box-shadow: 0 0 10px var(--prism-red); }
+
+        /* Product cards */
+        .unit-card { background: var(--bg-surface); border: 1px solid #2b3035; border-radius: 6px; padding: 1.5rem 2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
+        .unit-card.soldout { border-color: rgba(255,92,92,0.4); background: rgba(255,92,92,0.04); }
+        .unit-card.low-stock { border-color: rgba(245,166,35,0.35); }
+        .status-led { width: 10px; height: 10px; border-radius: 50%; margin-right: 20px; flex-shrink: 0; }
+        .led-cyan   { background: var(--prism-cyan);  box-shadow: 0 0 10px var(--prism-cyan); }
+        .led-red    { background: var(--prism-red);   box-shadow: 0 0 10px var(--prism-red); }
+        .led-amber  { background: var(--prism-amber); box-shadow: 0 0 8px var(--prism-amber); }
+        .led-gray   { background: #3a3f45; }
         .unit-identity { min-width: 200px; }
         .unit-title { font-weight: 600; font-size: 1.1rem; }
         .unit-badge { font-size: 0.65rem; color: var(--text-dim); background: #000; padding: 2px 6px; border-radius: 3px; font-weight: 700; text-transform: uppercase; }
+        .soldout-tag { font-size: 0.65rem; background: rgba(255,92,92,0.15); color: var(--prism-red); border: 1px solid rgba(255,92,92,0.35); padding: 2px 7px; border-radius: 3px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
+        .lowstock-tag { font-size: 0.65rem; background: rgba(245,166,35,0.12); color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.3); padding: 2px 7px; border-radius: 3px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
         .metric-wrap { display: flex; gap: 3rem; }
         .m-head { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
         .m-body { font-family: 'JetBrains Mono', monospace; }
-        
-        .prism-btn { background: transparent; color: var(--prism-cyan); border: 1px solid rgba(38,196,202,0.3); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 4px; text-transform: uppercase; transition: 0.2s; }
+
+        /* Buttons */
+        .prism-btn { background: transparent; color: var(--prism-cyan); border: 1px solid rgba(38,196,202,0.3); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 4px; text-transform: uppercase; transition: 0.2s; cursor: pointer; }
         .prism-btn:hover { background: var(--prism-cyan); color: #000; }
         .prism-btn.withdraw { color: var(--prism-red); border-color: rgba(255, 92, 92, 0.3); }
         .prism-btn.withdraw:hover { background: var(--prism-red); color: #000; }
-        .admin-controls { text-align: right; }
+        .prism-btn.amber { color: var(--prism-amber); border-color: rgba(245,166,35,0.3); }
+        .prism-btn.amber:hover { background: var(--prism-amber); color: #000; }
+        .prism-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+        /* Transaction badges */
+        .tx-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tx-in  { background: rgba(76,175,136,0.15);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.3); }
+        .tx-out { background: rgba(255,92,92,0.12);   color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.3); }
+        .tx-new { background: rgba(38,196,202,0.12);  color: var(--prism-cyan);  border: 1px solid rgba(38,196,202,0.3); }
+
+        /* Management / Overview cards */
+        .stat-card { background: var(--bg-surface); border: 1px solid #2b3035; border-radius: 8px; padding: 1.4rem 1.8rem; }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; }
+        .stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-top: 4px; }
+
+        /* Stock bar */
+        .stock-bar-wrap { width: 110px; }
+        .stock-bar-bg { background: #2b3035; border-radius: 99px; height: 6px; overflow: hidden; }
+        .stock-bar-fill { height: 6px; border-radius: 99px; transition: width 0.4s; }
+
+        /* Status pill */
+        .status-pill { font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 99px; text-transform: uppercase; white-space: nowrap; }
+        .pill-ok      { background: rgba(76,175,136,0.15);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.3); }
+        .pill-low     { background: rgba(245,166,35,0.12);  color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.3); }
+        .pill-out     { background: rgba(255,92,92,0.12);   color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.3); }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-deep); }
@@ -55,16 +88,15 @@
     <div style="color:var(--prism-cyan); font-size:1.6rem; font-weight:700; margin-bottom:3.5rem;">
         <i class="ph ph-cube-fill me-2"></i> PRISM
     </div>
-    
     <div class="nav-group">
         <div class="nav-label">Core Systems</div>
         <a class="nav-item active" onclick="loadModule('products', this)"><i class="ph ph-cpu"></i> Products</a>
         <a class="nav-item" onclick="loadModule('categories', this)"><i class="ph ph-tag"></i> Categories</a>
         <a class="nav-item" onclick="loadModule('transactions', this)"><i class="ph ph-arrows-left-right"></i> Transactions</a>
     </div>
-
     <div class="nav-group">
         <div class="nav-label">Management</div>
+        <a class="nav-item" onclick="loadModule('inventory_overview', this)"><i class="ph ph-chart-bar"></i> Inventory Overview</a>
         <a class="nav-item" onclick="loadModule('suppliers', this)"><i class="ph ph-users-three"></i> Suppliers</a>
         <a class="nav-item"><i class="ph ph-gear"></i> Settings</a>
     </div>
@@ -74,141 +106,510 @@
     <header class="d-flex justify-content-between align-items-end mb-5">
         <div>
             <h2 id="module-title">Project Argo: PRODUCTS</h2>
-            <p>Admin: THOMAS P. // Status: <span id="api-status">ONLINE</span></p>
+            <p>Status: <span id="api-status">ONLINE</span></p>
         </div>
-        <button class="prism-btn" onclick="location.reload()">System Reset</button>
+        <div>
+            <button class="prism-btn me-2" data-bs-toggle="modal" data-bs-target="#newProductModal">Deploy New Product</button>
+            <button class="prism-btn withdraw" onclick="location.reload()">System Reset</button>
+        </div>
     </header>
-    
     <div id="prismContainer"></div>
 </main>
 
+<!-- ── New Product Modal ── -->
+<div class="modal fade" id="newProductModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:var(--bg-surface);color:var(--text-bright);border:1px solid #2b3035;">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" style="color:var(--prism-cyan);font-weight:700;">INITIALIZE NEW ASSET</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Product Name</label>
+                    <input type="text" class="form-control bg-dark text-white border-secondary" id="f-name" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Category</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" id="f-category" placeholder="e.g. Electronics">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Supplier</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" id="f-supplier" placeholder="e.g. TechCorp">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Initial Quantity</label>
+                        <input type="number" class="form-control bg-dark text-white border-secondary" id="f-qty" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Unit Price (₱)</label>
+                        <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="f-price" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn" onclick="submitNewProduct()">Compile & Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Restock Calculator Modal ── -->
+<div class="modal fade" id="restockModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content" style="background:var(--bg-surface);color:var(--text-bright);border:1px solid #2b3035;">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" style="color:var(--prism-amber);font-weight:700;">
+                    <i class="ph ph-calculator me-2"></i>RESTOCK CALCULATOR
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:1.2rem;">
+                    Enter how many units you want to restock. The total cost will be calculated at the current unit price.
+                </p>
+                <div style="background:#0f1113;border:1px solid #2b3035;border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
+                    <div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;font-weight:800;margin-bottom:4px;">Product</div>
+                    <div id="rc-product-name" style="font-weight:600;font-size:1rem;"></div>
+                    <div id="rc-product-meta" style="font-size:0.8rem;color:var(--text-dim);margin-top:2px;"></div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Quantity to Restock</label>
+                        <input type="number" class="form-control bg-dark text-white border-secondary" id="rc-qty" min="1" placeholder="e.g. 50" oninput="calcRestock()">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Unit Price (₱)</label>
+                        <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="rc-price" min="0" oninput="calcRestock()">
+                    </div>
+                </div>
+                <!-- Result -->
+                <div style="background:rgba(38,196,202,0.06);border:1px solid rgba(38,196,202,0.2);border-radius:6px;padding:1.1rem 1.4rem;">
+                    <div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;font-weight:800;margin-bottom:6px;">Estimated Total Cost</div>
+                    <div id="rc-total" style="font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;color:var(--prism-cyan);">₱0.00</div>
+                    <div id="rc-breakdown" style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="prism-btn" onclick="confirmRestock()">Confirm & Add to Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    async function loadModule(action, element) {
-        const status = document.getElementById('api-status');
-        const container = document.getElementById('prismContainer');
-        const title = document.getElementById('module-title');
-        
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        if(element) element.classList.add('active');
-        
-        title.innerText = `Project Argo: ${action.toUpperCase()}`;
-        status.innerText = "POLLING API...";
+// ─── State ────────────────────────────────────────────────
+let restockTarget = null; // { id, name, price }
 
-        try {
-            const res = await fetch(`api.php?action=${action}`);
-            const data = await res.json();
-            
-            if (data.error) throw new Error(data.error);
-            container.innerHTML = ''; 
+// ─── Module Loader ────────────────────────────────────────
+async function loadModule(action, element) {
+    const status    = document.getElementById('api-status');
+    const container = document.getElementById('prismContainer');
+    const title     = document.getElementById('module-title');
 
-            if (action === 'products') {
-                renderProducts(data);
-            } else {
-                renderTable(data);
-            }
-            status.innerText = "ONLINE";
-        } catch (err) {
-            status.innerText = "BRIDGE FAILED";
-            container.innerHTML = `<div class="text-danger">SYSTEM HALT: ${err.message}</div>`;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (element) element.classList.add('active');
+
+    const titleMap = {
+        products: 'PRODUCTS', categories: 'CATEGORIES',
+        transactions: 'TRANSACTIONS', suppliers: 'SUPPLIERS',
+        inventory_overview: 'INVENTORY OVERVIEW'
+    };
+    title.innerText  = `Project Argo: ${titleMap[action] || action.toUpperCase()}`;
+    status.innerText = 'POLLING API...';
+
+    try {
+        const res  = await fetch(`api.php?action=${action}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        container.innerHTML = '';
+        if      (action === 'products')           renderProducts(data);
+        else if (action === 'transactions')        renderTransactions(data);
+        else if (action === 'inventory_overview')  renderInventoryOverview(data);
+        else                                       renderTable(data);
+
+        status.innerText = 'ONLINE';
+    } catch (err) {
+        status.innerText    = 'BRIDGE FAILED';
+        container.innerHTML = `<div class="text-danger">SYSTEM HALT: ${err.message}</div>`;
+    }
+}
+
+// ─── Stock Management ─────────────────────────────────────
+async function manage(type, id) {
+    const label = type === 'IN' ? 'Add' : 'Withdraw';
+    const qty   = prompt(`Enter quantity to ${label}:`);
+    if (!qty || isNaN(qty) || qty <= 0) return;
+
+    document.getElementById('api-status').innerText = 'PROCESSING...';
+
+    try {
+        const fd = new FormData();
+        fd.append('action',           'manage_stock');
+        fd.append('Product_id',       id);
+        fd.append('Transaction_qty',  qty);
+        fd.append('Transaction_type', type);
+
+        const res    = await fetch('process.php', { method: 'POST', body: fd });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            loadModule('products', document.querySelector('.nav-item.active'));
+        } else {
+            alert('Error: ' + result.error);
+            document.getElementById('api-status').innerText = 'ONLINE';
         }
+    } catch {
+        alert('Bridge Failed: Could not reach process.php');
+        document.getElementById('api-status').innerText = 'BRIDGE FAILED';
+    }
+}
+
+// ─── New Product ──────────────────────────────────────────
+async function submitNewProduct() {
+    const name     = document.getElementById('f-name').value.trim();
+    const category = document.getElementById('f-category').value.trim();
+    const supplier = document.getElementById('f-supplier').value.trim();
+    const qty      = document.getElementById('f-qty').value;
+    const price    = document.getElementById('f-price').value;
+
+    if (!name || !category || !supplier || qty === '' || price === '') {
+        alert('Please fill in all fields.'); return;
     }
 
-    async function manage(type, id) {
-        const qty = prompt(`Enter quantity to ${type === 'IN' ? 'Add' : 'Withdraw'}:`);
-        if (!qty || isNaN(qty) || qty <= 0) return;
+    document.getElementById('api-status').innerText = 'UPLOADING...';
 
-        const status = document.getElementById('api-status');
-        status.innerText = "PROCESSING...";
+    const fd = new FormData();
+    fd.append('action', 'create_product');
+    fd.append('product_name',  name);
+    fd.append('category_name', category);
+    fd.append('supplier_name', supplier);
+    fd.append('quantity',      qty);
+    fd.append('price',         price);
 
-        try {
-            const formData = new FormData();
-            formData.append('Product_id', id);
-            formData.append('Transaction_qty', qty);
-            formData.append('Transaction_type', type);
+    try {
+        const res    = await fetch('process.php', { method: 'POST', body: fd });
+        const result = await res.json();
 
-            const res = await fetch('process.php', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await res.json();
-            if (result.status === 'success') {
-                loadModule('products'); 
-            } else {
-                alert("Error: " + result.error);
-            }
-        } catch (err) {
-            alert("Connection to process.php failed.");
-            status.innerText = "BRIDGE FAILED";
+        if (result.status === 'success') {
+            const m = bootstrap.Modal.getInstance(document.getElementById('newProductModal'))
+                   || new bootstrap.Modal(document.getElementById('newProductModal'));
+            m.hide();
+            ['f-name','f-category','f-supplier','f-qty','f-price'].forEach(i => document.getElementById(i).value = '');
+            loadModule('products', document.querySelector('.nav-item.active'));
+        } else {
+            alert('Database Error: ' + result.error);
+            document.getElementById('api-status').innerText = 'ONLINE';
         }
+    } catch {
+        alert('Bridge Failed: Could not reach process.php');
+        document.getElementById('api-status').innerText = 'BRIDGE FAILED';
     }
+}
 
-    function renderProducts(data) {
-        const container = document.getElementById('prismContainer');
-        container.innerHTML = ''; 
-        
-        data.forEach(item => {
-            const catName = item.Category_name || "General Assets"; 
-            const low = parseInt(item.Stock_qty) < 10;
-            
-            container.innerHTML += `
-                <div class="unit-card">
-                    <div class="d-flex align-items-center">
-                        <div class="status-led ${low ? 'led-red' : 'led-cyan'}"></div>
-                        <div class="unit-identity">
-                            <div class="unit-title">${item.product_name}</div>
-                            <span class="unit-badge">${catName}</span>
-                        </div>
-                    </div>
-                    <div class="metric-wrap">
-                        <div>
-                            <div class="m-head">Revision</div>
-                            <div class="m-body">P00${item.Product_id}</div>
-                        </div>
-                        <div>
-                            <div class="m-head">Objects</div>
-                            <div class="m-body fw-bold text-white">${item.Stock_qty}</div>
-                        </div>
-                    </div>
-                    <div class="admin-controls d-flex gap-2">
-                        <div class="cost-display m-body me-3">₱${parseFloat(item.Unit_price).toLocaleString()}</div>
-                        <button class="prism-btn" onclick="manage('IN', ${item.Product_id})">Add</button>
-                        <button class="prism-btn withdraw" onclick="manage('OUT', ${item.Product_id})">Withdraw</button>
-                    </div>
-                </div>`;
-        });
-    }
+// ─── Restock Calculator ───────────────────────────────────
+function openRestockModal(id, name, price) {
+    restockTarget = { id, name, price };
+    document.getElementById('rc-product-name').innerText = name;
+    document.getElementById('rc-product-meta').innerText = `Unit Price: ₱${parseFloat(price).toLocaleString()}`;
+    document.getElementById('rc-qty').value   = '';
+    document.getElementById('rc-price').value = parseFloat(price).toFixed(2);
+    document.getElementById('rc-total').innerText     = '₱0.00';
+    document.getElementById('rc-breakdown').innerText = '';
+    new bootstrap.Modal(document.getElementById('restockModal')).show();
+}
 
-    function renderTable(data) {
-        const container = document.getElementById('prismContainer');
-        if (!data || data.length === 0) { 
-            container.innerHTML = "<p class='text-dim'>No records found in this sector.</p>"; 
-            return; 
+function calcRestock() {
+    const qty   = parseFloat(document.getElementById('rc-qty').value)   || 0;
+    const price = parseFloat(document.getElementById('rc-price').value) || 0;
+    const total = qty * price;
+    document.getElementById('rc-total').innerText     = '₱' + total.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+    document.getElementById('rc-breakdown').innerText = qty > 0 && price > 0
+        ? `${qty} units × ₱${price.toLocaleString()} per unit`
+        : '';
+}
+
+async function confirmRestock() {
+    if (!restockTarget) return;
+    const qty = parseInt(document.getElementById('rc-qty').value);
+    if (!qty || qty <= 0) { alert('Please enter a valid quantity.'); return; }
+
+    document.getElementById('api-status').innerText = 'PROCESSING...';
+
+    const fd = new FormData();
+    fd.append('action',           'manage_stock');
+    fd.append('Product_id',       restockTarget.id);
+    fd.append('Transaction_qty',  qty);
+    fd.append('Transaction_type', 'IN');
+
+    try {
+        const res    = await fetch('process.php', { method: 'POST', body: fd });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            bootstrap.Modal.getInstance(document.getElementById('restockModal')).hide();
+            // Refresh whatever tab is open
+            const activeNav = document.querySelector('.nav-item.active');
+            const activeAction = activeNav ? activeNav.getAttribute('data-action') : 'products';
+            loadModule(activeAction || 'inventory_overview', activeNav);
+        } else {
+            alert('Error: ' + result.error);
+            document.getElementById('api-status').innerText = 'ONLINE';
         }
-        
-        let tableHTML = `<div class="table-responsive">
-            <table class="table table-dark table-hover border-secondary" style="font-size:0.9rem;">
-                <thead><tr>`;
-        
-        Object.keys(data[0]).forEach(key => {
-            tableHTML += `<th class="text-dim text-uppercase" style="font-size:0.7rem;">${key.replace('_', ' ')}</th>`;
-        });
-        
-        tableHTML += `</tr></thead><tbody>`;
-        
-        data.forEach(row => {
-            tableHTML += `<tr>`;
-            Object.values(row).forEach(val => {
-                tableHTML += `<td class="py-3 m-body">${val}</td>`;
-            });
-            tableHTML += `</tr>`;
-        });
-        
-        tableHTML += `</tbody></table></div>`;
-        container.innerHTML = tableHTML;
+    } catch {
+        alert('Bridge Failed: Could not reach process.php');
+        document.getElementById('api-status').innerText = 'BRIDGE FAILED';
+    }
+}
+
+// ─── Renderers ────────────────────────────────────────────
+
+function renderProducts(data) {
+    const container = document.getElementById('prismContainer');
+    container.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-dim)'>No products found.</p>";
+        return;
     }
 
-    window.onload = () => loadModule('products', document.querySelector('.nav-item.active'));
+    data.forEach(item => {
+        const qty      = parseInt(item.Stock_qty);
+        const soldOut  = qty === 0;
+        const lowStock = qty > 0 && qty < 10;
+
+        const ledClass  = soldOut ? 'led-gray' : lowStock ? 'led-amber' : 'led-cyan';
+        const cardClass = soldOut ? 'soldout'  : lowStock ? 'low-stock' : '';
+
+        const extraTag = soldOut
+            ? `<span class="soldout-tag"><i class="ph ph-x-circle"></i> Sold Out</span>`
+            : lowStock
+            ? `<span class="lowstock-tag"><i class="ph ph-warning"></i> Low Stock</span>`
+            : '';
+
+        container.innerHTML += `
+        <div class="unit-card ${cardClass}">
+            <div class="d-flex align-items-center">
+                <div class="status-led ${ledClass}"></div>
+                <div class="unit-identity">
+                    <div class="unit-title">${item.product_name} ${extraTag}</div>
+                    <span class="unit-badge">${item.Category_name || 'General'}</span>
+                </div>
+            </div>
+            <div class="metric-wrap">
+                <div>
+                    <div class="m-head">Revision</div>
+                    <div class="m-body">P00${item.Product_id}</div>
+                </div>
+                <div>
+                    <div class="m-head">Objects</div>
+                    <div class="m-body fw-bold ${soldOut ? 'text-danger' : 'text-white'}">${qty}</div>
+                </div>
+                <div>
+                    <div class="m-head">Supplier</div>
+                    <div class="m-body" style="font-size:0.8rem;">${item.supplier_name || '—'}</div>
+                </div>
+            </div>
+            <div class="admin-controls d-flex gap-2 align-items-center">
+                <div class="m-body me-3">₱${parseFloat(item.Unit_price).toLocaleString()}</div>
+                <button class="prism-btn" onclick="manage('IN', ${item.Product_id})">Add</button>
+                <button class="prism-btn withdraw" onclick="manage('OUT', ${item.Product_id})" ${soldOut ? 'disabled' : ''}>Withdraw</button>
+            </div>
+        </div>`;
+    });
+}
+
+function renderInventoryOverview(data) {
+    const container = document.getElementById('prismContainer');
+    container.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-dim)'>No inventory data found.</p>";
+        return;
+    }
+
+    // Summary stats
+    const totalProducts  = data.length;
+    const totalValue     = data.reduce((s, r) => s + parseFloat(r.stock_value || 0), 0);
+    const totalSold      = data.reduce((s, r) => s + parseInt(r.total_sold || 0), 0);
+    const soldOutCount   = data.filter(r => parseInt(r.Stock_qty) === 0).length;
+    const lowStockCount  = data.filter(r => parseInt(r.Stock_qty) > 0 && parseInt(r.Stock_qty) < 10).length;
+
+    // Max stock for bar scaling
+    const maxQty = Math.max(...data.map(r => parseInt(r.Stock_qty) || 0), 1);
+
+    // Attach data-action to nav items for restock refresh
+    document.querySelectorAll('.nav-item').forEach(el => {
+        const onclick = el.getAttribute('onclick') || '';
+        const match   = onclick.match(/'([^']+)'/);
+        if (match) el.setAttribute('data-action', match[1]);
+    });
+
+    container.innerHTML = `
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--prism-cyan)">${totalProducts}</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--prism-green)">₱${totalValue.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
+                <div class="stat-label">Total Stock Value</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--prism-amber)">${totalSold}</div>
+                <div class="stat-label">Units Sold (all time)</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--prism-red)">${soldOutCount} <span style="font-size:1rem;color:var(--prism-amber)">/ ${lowStockCount} low</span></div>
+                <div class="stat-label">Sold Out / Low Stock</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Table -->
+    <div class="table-responsive">
+    <table class="table table-dark table-hover border-secondary" style="font-size:0.88rem;">
+        <thead>
+            <tr>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Product</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Supplier</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Stock Left</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Stock Level</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Sold</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Unit Price</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Stock Value</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Status</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+    ` + data.map(row => {
+        const qty       = parseInt(row.Stock_qty)  || 0;
+        const sold      = parseInt(row.total_sold) || 0;
+        const value     = parseFloat(row.stock_value) || 0;
+        const price     = parseFloat(row.Unit_price)  || 0;
+        const soldOut   = qty === 0;
+        const lowStock  = qty > 0 && qty < 10;
+        const pct       = Math.round((qty / maxQty) * 100);
+        const barColor  = soldOut ? '#3a3f45' : lowStock ? 'var(--prism-amber)' : 'var(--prism-cyan)';
+        const statusPill = soldOut
+            ? `<span class="status-pill pill-out">Sold Out</span>`
+            : lowStock
+            ? `<span class="status-pill pill-low">Low Stock</span>`
+            : `<span class="status-pill pill-ok">In Stock</span>`;
+
+        return `<tr>
+            <td class="py-3 fw-bold">${row.product_name}</td>
+            <td class="py-3" style="color:var(--text-dim)">${row.supplier_name || '—'}</td>
+            <td class="py-3 m-body ${soldOut ? 'text-danger' : lowStock ? '' : ''}" style="${lowStock ? 'color:var(--prism-amber)' : ''}">${qty}</td>
+            <td class="py-3">
+                <div class="stock-bar-wrap">
+                    <div class="stock-bar-bg">
+                        <div class="stock-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px;">${pct}%</div>
+                </div>
+            </td>
+            <td class="py-3 m-body" style="color:var(--prism-amber)">${sold > 0 ? sold : '—'}</td>
+            <td class="py-3 m-body">₱${price.toLocaleString()}</td>
+            <td class="py-3 m-body" style="color:var(--prism-green)">₱${value.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
+            <td class="py-3">${statusPill}</td>
+            <td class="py-3">
+                <button class="prism-btn amber" style="font-size:0.7rem;padding:4px 10px;"
+                    onclick="openRestockModal(${row.Product_id}, '${row.product_name.replace(/'/g,"\\'")}', ${price})">
+                    <i class="ph ph-calculator"></i> Restock
+                </button>
+            </td>
+        </tr>`;
+    }).join('') + `
+        </tbody>
+    </table>
+    </div>`;
+}
+
+function renderTransactions(data) {
+    const container = document.getElementById('prismContainer');
+
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-dim)'>No transactions recorded yet.</p>";
+        return;
+    }
+
+    const typeLabel = { IN: 'Add', OUT: 'Withdraw', NEW: 'New Product' };
+    const typeBadge = { IN: 'tx-in', OUT: 'tx-out', NEW: 'tx-new' };
+
+    let html = `<div class="table-responsive">
+        <table class="table table-dark table-hover border-secondary" style="font-size:0.9rem;">
+            <thead><tr>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">ID</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Product</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Type</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Quantity</th>
+                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Date & Time</th>
+            </tr></thead><tbody>`;
+
+    data.forEach(row => {
+        const t        = row.Transaction_type || 'IN';
+        const badge    = typeBadge[t] || 'tx-in';
+        const label    = typeLabel[t] || t;
+        const qty      = (t === 'OUT' ? '−' : '+') + row.Transaction_qty;
+        const qtyColor = t === 'OUT' ? 'color:var(--prism-red)' : 'color:var(--prism-green)';
+        const date     = new Date(row.transaction_date).toLocaleString('en-PH', {
+            year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
+        });
+        html += `<tr>
+            <td class="py-3 m-body" style="color:var(--text-dim)">#${row.Transaction_id}</td>
+            <td class="py-3 fw-bold">${row.product_name || '—'}</td>
+            <td class="py-3"><span class="tx-badge ${badge}">${label}</span></td>
+            <td class="py-3 m-body" style="${qtyColor}">${qty}</td>
+            <td class="py-3" style="color:var(--text-dim);font-size:0.85rem;">${date}</td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+function renderTable(data) {
+    const container = document.getElementById('prismContainer');
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p style='color:var(--text-dim)'>No records found in this sector.</p>";
+        return;
+    }
+
+    let html = `<div class="table-responsive">
+        <table class="table table-dark table-hover border-secondary" style="font-size:0.9rem;">
+            <thead><tr>`;
+
+    Object.keys(data[0]).forEach(key => {
+        html += `<th class="text-dim text-uppercase" style="font-size:0.7rem;">${key.replace(/_/g,' ')}</th>`;
+    });
+
+    html += `</tr></thead><tbody>`;
+    data.forEach(row => {
+        html += `<tr>`;
+        Object.values(row).forEach(val => { html += `<td class="py-3 m-body">${val ?? '—'}</td>`; });
+        html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+window.onload = () => loadModule('products', document.querySelector('.nav-item.active'));
 </script>
 </body>
 </html>

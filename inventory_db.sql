@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 01, 2026 at 05:17 AM
+-- Generation Time: Apr 02, 2026 at 06:58 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `inventory_db`
 --
+CREATE DATABASE IF NOT EXISTS `inventory_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `inventory_db`;
 
 -- --------------------------------------------------------
 
@@ -27,6 +29,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `categories`
 --
 
+DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
   `Category_name` varchar(50) NOT NULL,
   `Category_id` int(11) NOT NULL,
@@ -49,6 +52,7 @@ INSERT INTO `categories` (`Category_name`, `Category_id`, `Description`) VALUES
 -- Table structure for table `products`
 --
 
+DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
   `Product_id` int(11) NOT NULL,
   `product_name` varchar(100) DEFAULT NULL,
@@ -63,7 +67,8 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`Product_id`, `product_name`, `Category_name`, `Supplier_id`, `Unit_price`, `Stock_qty`) VALUES
-(3001, 'POCO X7 Pro 5G', 'Smartphones', 501, 18500.00, 20),
+(0, 'Xiaomi Redmi Note 10 Pro', 'Smartphones', 501, 12599.00, 67),
+(3001, 'POCO X7 Pro 5G', 'Smartphones', 501, 18500.00, 25),
 (3002, 'PlayStation 5 Slim', 'Gaming Consoles', 502, 30500.00, 15),
 (3003, 'Apple Watch Series 9', 'Wearables', 503, 24900.00, 10),
 (3004, 'Galaxy Buds3 Pro', 'Audio Gear', 504, 12500.00, 35),
@@ -75,6 +80,7 @@ INSERT INTO `products` (`Product_id`, `product_name`, `Category_name`, `Supplier
 -- Table structure for table `stock_transactions`
 --
 
+DROP TABLE IF EXISTS `stock_transactions`;
 CREATE TABLE `stock_transactions` (
   `Transaction_id` int(11) NOT NULL,
   `Product_id` int(11) DEFAULT NULL,
@@ -89,6 +95,7 @@ CREATE TABLE `stock_transactions` (
 -- Table structure for table `suppliers`
 --
 
+DROP TABLE IF EXISTS `suppliers`;
 CREATE TABLE `suppliers` (
   `Supplier_id` int(11) NOT NULL,
   `supplier_name` varchar(100) DEFAULT NULL,
@@ -136,6 +143,22 @@ ALTER TABLE `stock_transactions`
 --
 ALTER TABLE `suppliers`
   ADD PRIMARY KEY (`Supplier_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `Category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
+
+--
+-- AUTO_INCREMENT for table `stock_transactions`
+--
+ALTER TABLE `stock_transactions`
+  MODIFY `Transaction_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
