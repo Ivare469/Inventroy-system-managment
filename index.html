@@ -4,612 +4,669 @@
     <meta charset="UTF-8">
     <title>Prism | StockPro Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
-            --bg-deep: #0f1113; --bg-surface: #181c20;
-            --prism-cyan: #26c4ca; --prism-red: #ff5c5c;
-            --prism-green: #4caf88; --prism-amber: #f5a623;
-            --text-dim: #828d95; --text-bright: #e1e4e8;
-            --sidebar-w: 260px;
+            --bg-deep: #0a0c0e; --bg-surface: #111518; --bg-card: #161b1f; --bg-hover: #1c2228;
+            --prism-cyan: #26c4ca; --prism-cyan-dim: rgba(38,196,202,0.12);
+            --prism-red: #ff5c5c; --prism-red-dim: rgba(255,92,92,0.1);
+            --prism-green: #4caf88; --prism-amber: #f5a623; --prism-purple: #9b7fe8;
+            --text-dim: #5a6472; --text-mid: #8a95a0; --text-bright: #dde3e8;
+            --border: #1e2530; --border-mid: #2b3540;
+            --sidebar-w: 268px; --header-h: 80px; --radius: 10px;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text-bright); margin: 0; }
-
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg-deep); color: var(--text-bright); margin: 0; overflow-x: hidden; }
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image: linear-gradient(rgba(38,196,202,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(38,196,202,0.025) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
         /* Sidebar */
-        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; background: var(--bg-surface); border-right: 1px solid #2b3035; padding: 2.5rem 1.5rem; overflow-y: auto; }
-        .nav-group { margin-bottom: 2rem; }
-        .nav-label { font-size: 0.65rem; color: #4b545c; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
-        .nav-item { display: flex; align-items: center; color: var(--text-dim); text-decoration: none; padding: 8px 0; font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
-        .nav-item i { margin-right: 12px; font-size: 1.2rem; }
-        .nav-item:hover, .nav-item.active { color: var(--prism-cyan); }
-
+        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; top:0; left:0; background: var(--bg-surface); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 1.8rem 1.6rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--prism-cyan), #1a9fa5); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #000; flex-shrink: 0; }
+        .logo-text { font-size: 1.2rem; font-weight: 700; letter-spacing: 2px; }
+        .logo-version { font-size: 0.6rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+        .sidebar-body { padding: 1.2rem 1rem; flex: 1; }
+        .nav-group { margin-bottom: 1.8rem; }
+        .nav-label { font-size: 0.6rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 0 0.6rem; margin-bottom: 0.5rem; display: block; }
+        .nav-item { display: flex; align-items: center; color: var(--text-mid); text-decoration: none; padding: 9px 12px; font-size: 0.88rem; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.18s; position: relative; margin-bottom: 2px; gap: 10px; user-select: none; }
+        .nav-item i { font-size: 1.1rem; flex-shrink: 0; }
+        .nav-item:hover { background: var(--bg-hover); color: var(--text-bright); }
+        .nav-item.active { background: var(--prism-cyan-dim); color: var(--prism-cyan); }
+        .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; background: var(--prism-cyan); border-radius: 0 3px 3px 0; }
+        .sidebar-footer { padding: 1rem 1.6rem; border-top: 1px solid var(--border); font-size: 0.68rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+        .sidebar-footer span { color: var(--prism-cyan); }
         /* Main */
-        .prism-viewport { margin-left: var(--sidebar-w); padding: 3.5rem; }
-
-        /* Product cards */
-        .unit-card { background: var(--bg-surface); border: 1px solid #2b3035; border-radius: 6px; padding: 1.5rem 2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
-        .unit-card.soldout { border-color: rgba(255,92,92,0.4); background: rgba(255,92,92,0.04); }
-        .unit-card.low-stock { border-color: rgba(245,166,35,0.35); }
-        .status-led { width: 10px; height: 10px; border-radius: 50%; margin-right: 20px; flex-shrink: 0; }
-        .led-cyan   { background: var(--prism-cyan);  box-shadow: 0 0 10px var(--prism-cyan); }
-        .led-red    { background: var(--prism-red);   box-shadow: 0 0 10px var(--prism-red); }
-        .led-amber  { background: var(--prism-amber); box-shadow: 0 0 8px var(--prism-amber); }
-        .led-gray   { background: #3a3f45; }
-        .unit-identity { min-width: 200px; }
-        .unit-title { font-weight: 600; font-size: 1.1rem; }
-        .unit-badge { font-size: 0.65rem; color: var(--text-dim); background: #000; padding: 2px 6px; border-radius: 3px; font-weight: 700; text-transform: uppercase; }
-        .soldout-tag { font-size: 0.65rem; background: rgba(255,92,92,0.15); color: var(--prism-red); border: 1px solid rgba(255,92,92,0.35); padding: 2px 7px; border-radius: 3px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
-        .lowstock-tag { font-size: 0.65rem; background: rgba(245,166,35,0.12); color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.3); padding: 2px 7px; border-radius: 3px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
-        .metric-wrap { display: flex; gap: 3rem; }
-        .m-head { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
-        .m-body { font-family: 'JetBrains Mono', monospace; }
-
+        .prism-viewport { margin-left: var(--sidebar-w); min-height: 100vh; position: relative; z-index: 1; }
+        .prism-header { position: sticky; top: 0; background: rgba(10,12,14,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2.6rem; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; z-index: 50; }
+        .header-left h2 { font-size: 1.1rem; font-weight: 700; margin: 0; letter-spacing: 0.5px; }
+        .header-status { font-size: 0.7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; background: var(--prism-green); box-shadow: 0 0 6px var(--prism-green); animation: pulseDot 2s ease-in-out infinite; }
+        @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .live-clock { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; white-space: nowrap; }
+        .notif-btn { position: relative; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-mid); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; font-size: 1.1rem; }
+        .notif-btn:hover { border-color: var(--prism-cyan); color: var(--prism-cyan); }
+        .notif-count { position: absolute; top: -4px; right: -4px; background: var(--prism-red); color: #fff; font-size: 0.55rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-deep); }
         /* Buttons */
-        .prism-btn { background: transparent; color: var(--prism-cyan); border: 1px solid rgba(38,196,202,0.3); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 4px; text-transform: uppercase; transition: 0.2s; cursor: pointer; }
+        .prism-btn { background: transparent; color: var(--prism-cyan); border: 1px solid rgba(38,196,202,0.3); font-size: 0.75rem; font-weight: 700; padding: 7px 16px; border-radius: 7px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.18s; cursor: pointer; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
         .prism-btn:hover { background: var(--prism-cyan); color: #000; }
-        .prism-btn.withdraw { color: var(--prism-red); border-color: rgba(255, 92, 92, 0.3); }
-        .prism-btn.withdraw:hover { background: var(--prism-red); color: #000; }
+        .prism-btn.withdraw { color: var(--prism-red); border-color: rgba(255,92,92,0.3); }
+        .prism-btn.withdraw:hover { background: var(--prism-red); color: #fff; }
         .prism-btn.amber { color: var(--prism-amber); border-color: rgba(245,166,35,0.3); }
         .prism-btn.amber:hover { background: var(--prism-amber); color: #000; }
-        .prism-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
-
-        /* Transaction badges */
-        .tx-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .tx-in  { background: rgba(76,175,136,0.15);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.3); }
-        .tx-out { background: rgba(255,92,92,0.12);   color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.3); }
-        .tx-new { background: rgba(38,196,202,0.12);  color: var(--prism-cyan);  border: 1px solid rgba(38,196,202,0.3); }
-
-        /* Management / Overview cards */
-        .stat-card { background: var(--bg-surface); border: 1px solid #2b3035; border-radius: 8px; padding: 1.4rem 1.8rem; }
-        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; }
-        .stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-top: 4px; }
-
+        .prism-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+        .kbd { display: inline-block; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 5px; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
+        .prism-content { padding: 2.2rem 2.6rem; }
+        /* Search bar */
+        .search-bar-wrap { display: flex; gap: 8px; margin-bottom: 1.4rem; align-items: center; flex-wrap: wrap; }
+        .search-input-wrap { position: relative; flex: 1; max-width: 340px; }
+        .search-input-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 1rem; pointer-events: none; }
+        .search-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-bright); padding: 8px 12px 8px 34px; border-radius: 8px; font-size: 0.84rem; font-family: 'Space Grotesk', sans-serif; outline: none; transition: border-color 0.15s; }
+        .search-input:focus { border-color: var(--prism-cyan); }
+        .search-input::placeholder { color: var(--text-dim); }
+        .filter-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-mid); padding: 7px 13px; border-radius: 7px; font-size: 0.77rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
+        .filter-btn:hover, .filter-btn.active-filter { border-color: var(--prism-cyan); color: var(--prism-cyan); background: var(--prism-cyan-dim); }
+        .results-count { font-size: 0.73rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+        /* Cards */
+        .unit-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; animation: cardIn 0.3s ease forwards; opacity: 0; }
+        @keyframes cardIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        .unit-card:hover { border-color: var(--border-mid); background: var(--bg-hover); transform: translateX(2px); }
+        .unit-card.soldout { border-color: rgba(255,92,92,0.28); background: rgba(255,92,92,0.03); }
+        .unit-card.low-stock { border-color: rgba(245,166,35,0.22); }
+        .unit-card.soldout:hover { transform: none; }
+        /* LEDs */
+        .status-led { width: 9px; height: 9px; border-radius: 50%; margin-right: 16px; flex-shrink: 0; }
+        .led-cyan  { background: var(--prism-cyan);  animation: pulseGreen 2.5s ease-in-out infinite; }
+        .led-amber { background: var(--prism-amber); animation: pulseAmber 1.8s ease-in-out infinite; }
+        .led-red   { background: var(--prism-red);   animation: pulseRed 1.4s ease-in-out infinite; }
+        .led-gray  { background: #2a3038; }
+        @keyframes pulseGreen { 0%,100%{box-shadow:0 0 0 0 rgba(38,196,202,0.5)} 50%{box-shadow:0 0 0 5px rgba(38,196,202,0)} }
+        @keyframes pulseAmber { 0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,0.5)} 50%{box-shadow:0 0 0 5px rgba(245,166,35,0)} }
+        @keyframes pulseRed   { 0%,100%{box-shadow:0 0 0 0 rgba(255,92,92,0.5)}  50%{box-shadow:0 0 0 5px rgba(255,92,92,0)} }
+        .unit-identity { min-width: 180px; }
+        .unit-title { font-weight: 600; font-size: 0.97rem; line-height: 1.3; }
+        .unit-badge { font-size: 0.6rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; margin-top: 4px; }
+        .cat-smartphones { background: rgba(155,127,232,0.12); color: var(--prism-purple); border: 1px solid rgba(155,127,232,0.22); }
+        .cat-gaming      { background: rgba(38,196,202,0.1);   color: var(--prism-cyan);   border: 1px solid rgba(38,196,202,0.18); }
+        .cat-wearables   { background: rgba(76,175,136,0.1);   color: var(--prism-green);  border: 1px solid rgba(76,175,136,0.18); }
+        .cat-audio       { background: rgba(245,166,35,0.1);   color: var(--prism-amber);  border: 1px solid rgba(245,166,35,0.18); }
+        .cat-default     { background: #111; color: var(--text-dim); border: 1px solid var(--border); }
+        .soldout-tag  { font-size: 0.6rem; background: rgba(255,92,92,0.1); color: var(--prism-red); border: 1px solid rgba(255,92,92,0.28); padding: 2px 7px; border-radius: 4px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
+        .lowstock-tag { font-size: 0.6rem; background: rgba(245,166,35,0.08); color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.22); padding: 2px 7px; border-radius: 4px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
+        .metric-wrap { display: flex; gap: 2.5rem; }
+        .m-head { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px; }
+        .m-body { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; }
+        /* Tx badges */
+        .tx-badge { font-size: 0.62rem; font-weight: 700; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tx-in  { background: rgba(76,175,136,0.1);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.22); }
+        .tx-out { background: rgba(255,92,92,0.08);  color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.22); }
+        .tx-new { background: rgba(38,196,202,0.08); color: var(--prism-cyan);  border: 1px solid rgba(38,196,202,0.22); }
+        /* Stat cards */
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.3rem 1.5rem; transition: border-color 0.2s; position: relative; overflow: hidden; }
+        .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; }
+        .stat-card.s-cyan::after  { background: var(--prism-cyan); }
+        .stat-card.s-green::after { background: var(--prism-green); }
+        .stat-card.s-amber::after { background: var(--prism-amber); }
+        .stat-card.s-red::after   { background: var(--prism-red); }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.7rem; font-weight: 700; line-height: 1; }
+        .stat-label { font-size: 0.67rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 6px; }
+        .stat-icon { position: absolute; right: 1.3rem; top: 50%; transform: translateY(-50%); font-size: 2.3rem; opacity: 0.06; }
         /* Stock bar */
-        .stock-bar-wrap { width: 110px; }
-        .stock-bar-bg { background: #2b3035; border-radius: 99px; height: 6px; overflow: hidden; }
-        .stock-bar-fill { height: 6px; border-radius: 99px; transition: width 0.4s; }
-
-        /* Status pill */
-        .status-pill { font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 99px; text-transform: uppercase; white-space: nowrap; }
-        .pill-ok      { background: rgba(76,175,136,0.15);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.3); }
-        .pill-low     { background: rgba(245,166,35,0.12);  color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.3); }
-        .pill-out     { background: rgba(255,92,92,0.12);   color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.3); }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: #2b3035; border-radius: 10px; }
+        .stock-bar-wrap { width: 100px; }
+        .stock-bar-bg { background: var(--border); border-radius: 99px; height: 5px; overflow: hidden; }
+        .stock-bar-fill { height: 5px; border-radius: 99px; transition: width 0.5s ease; }
+        /* Status pills */
+        .status-pill { font-size: 0.62rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; white-space: nowrap; }
+        .pill-ok  { background: rgba(76,175,136,0.1);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.22); }
+        .pill-low { background: rgba(245,166,35,0.08); color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.22); }
+        .pill-out { background: rgba(255,92,92,0.08);  color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.22); }
+        /* Skeleton */
+        .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .skeleton-card { height: 70px; margin-bottom: 0.8rem; border-radius: var(--radius); }
+        /* Toasts */
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast-item { background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; min-width: 260px; max-width: 340px; font-size: 0.84rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5); animation: toastIn 0.3s ease forwards; position: relative; overflow: hidden; }
+        @keyframes toastIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(20px)} }
+        .toast-item.fade-out { animation: toastOut 0.3s ease forwards; }
+        .toast-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .toast-success .toast-icon { color: var(--prism-green); }
+        .toast-error   .toast-icon { color: var(--prism-red); }
+        .toast-info    .toast-icon { color: var(--prism-cyan); }
+        .toast-msg { flex: 1; color: var(--text-bright); line-height: 1.4; }
+        .toast-close { color: var(--text-dim); cursor: pointer; font-size: 0.8rem; }
+        .toast-bar { position: absolute; bottom: 0; left: 0; height: 2px; animation: toastBar 3.5s linear forwards; }
+        .toast-success .toast-bar { background: var(--prism-green); }
+        .toast-error   .toast-bar { background: var(--prism-red); }
+        .toast-info    .toast-bar { background: var(--prism-cyan); }
+        @keyframes toastBar { from{width:100%} to{width:0} }
+        /* Scroll to top */
+        #scrollTopBtn { position: fixed; bottom: 24px; left: calc(var(--sidebar-w) + 20px); width: 36px; height: 36px; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 8px; color: var(--text-mid); cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 1rem; z-index: 200; transition: all 0.2s; }
+        #scrollTopBtn:hover { border-color: var(--prism-cyan); color: var(--prism-cyan); }
+        /* Tables */
+        .table-dark { --bs-table-bg: transparent; --bs-table-hover-bg: rgba(255,255,255,0.025); }
+        .table > :not(caption) > * > * { border-color: var(--border) !important; }
+        .table thead th { font-size: 0.64rem !important; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; color: var(--text-dim) !important; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border) !important; }
+        .table tbody td { padding: 0.82rem 1rem; vertical-align: middle; }
+        /* Modals */
+        .modal-content { background: var(--bg-card) !important; border: 1px solid var(--border-mid) !important; border-radius: 14px !important; }
+        .modal-header { border-bottom: 1px solid var(--border) !important; padding: 1.1rem 1.4rem; }
+        .modal-body { padding: 1.3rem 1.4rem; }
+        .modal-footer { border-top: 1px solid var(--border) !important; padding: 0.9rem 1.4rem; }
+        .form-control { background: var(--bg-surface) !important; border-color: var(--border-mid) !important; color: var(--text-bright) !important; border-radius: 8px !important; font-family: 'Space Grotesk', sans-serif; font-size: 0.87rem; }
+        .form-control:focus { border-color: var(--prism-cyan) !important; box-shadow: 0 0 0 2px rgba(38,196,202,0.14) !important; }
+        .form-label { font-size: 0.77rem; color: var(--text-mid); font-weight: 600; margin-bottom: 5px; }
+        /* Empty state */
+        .empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--text-dim); }
+        .empty-state i { font-size: 2.8rem; margin-bottom: 0.8rem; display: block; }
+        .empty-state p { font-size: 0.88rem; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+        /* Print */
+        @media print {
+            .prism-sidebar, .prism-header, .prism-btn, #scrollTopBtn, #toast-container { display: none !important; }
+            .prism-viewport { margin-left: 0 !important; }
+            body { background: #fff !important; color: #000 !important; }
+        }
     </style>
 </head>
 <body>
 
+<div id="toast-container"></div>
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="ph ph-arrow-up"></i></button>
+
 <aside class="prism-sidebar">
-    <div style="color:var(--prism-cyan); font-size:1.6rem; font-weight:700; margin-bottom:3.5rem;">
-        <i class="ph ph-cube-fill me-2"></i> PRISM
+    <div class="sidebar-logo">
+        <div class="logo-icon"><img src="https://i.pinimg.com/736x/81/bb/97/81bb9755fda692554a38385bb279be52.jpg" style="width: 30px; height: auto;" alt="Smaller image"></div>
+        <div>
+            <div class="logo-text">PRISM</div>
+            <div class="logo-version">v2.0 · STOCKPRO</div>
+        </div>
     </div>
-    <div class="nav-group">
-        <div class="nav-label">Core Systems</div>
-        <a class="nav-item active" onclick="loadModule('products', this)"><i class="ph ph-cpu"></i> Products</a>
-        <a class="nav-item" onclick="loadModule('categories', this)"><i class="ph ph-tag"></i> Categories</a>
-        <a class="nav-item" onclick="loadModule('transactions', this)"><i class="ph ph-arrows-left-right"></i> Transactions</a>
+    <div class="sidebar-body">
+        <div class="nav-group">
+            <span class="nav-label">Core Systems</span>
+            <a class="nav-item active" onclick="loadModule('products', this)"><i class="ph ph-cube"></i> Products</a>
+            <a class="nav-item" onclick="loadModule('categories', this)"><i class="ph ph-tag"></i> Categories</a>
+            <a class="nav-item" onclick="loadModule('transactions', this)"><i class="ph ph-arrows-left-right"></i> Transactions</a>
+        </div>
+        <div class="nav-group">
+            <span class="nav-label">Management</span>
+            <a class="nav-item" onclick="loadModule('inventory_overview', this)"><i class="ph ph-chart-bar"></i> Inventory Overview</a>
+            <a class="nav-item" onclick="loadModule('suppliers', this)"><i class="ph ph-users-three"></i> Suppliers</a>
+            <a class="nav-item" style="opacity:0.4;cursor:default;"><i class="ph ph-gear"></i> Settings</a>
+        </div>
     </div>
-    <div class="nav-group">
-        <div class="nav-label">Management</div>
-        <a class="nav-item" onclick="loadModule('inventory_overview', this)"><i class="ph ph-chart-bar"></i> Inventory Overview</a>
-        <a class="nav-item" onclick="loadModule('suppliers', this)"><i class="ph ph-users-three"></i> Suppliers</a>
-        <a class="nav-item"><i class="ph ph-gear"></i> Settings</a>
+    <div class="sidebar-footer">
+        <div>DB: <span>inventory_db</span></div>
+        <div style="margin-top:2px">Host: <span>localhost</span></div>
     </div>
 </aside>
 
-<main class="prism-viewport">
-    <header class="d-flex justify-content-between align-items-end mb-5">
-        <div>
+<div class="prism-viewport">
+    <div class="prism-header">
+        <div class="header-left">
             <h2 id="module-title">Project Argo: PRODUCTS</h2>
-            <p>Status: <span id="api-status">ONLINE</span></p>
+            <div class="header-status">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="api-status">ONLINE</span>
+                <span style="margin-left:10px;opacity:0.4">·</span>
+                <span style="margin-left:10px" id="record-count"></span>
+            </div>
         </div>
-        <div>
-            <button class="prism-btn me-2" data-bs-toggle="modal" data-bs-target="#newProductModal">Deploy New Product</button>
-            <button class="prism-btn withdraw" onclick="location.reload()">System Reset</button>
+        <div class="header-right">
+            <div class="live-clock" id="live-clock">--:--:--</div>
+            <div class="notif-btn" id="notif-btn" title="Stock Alerts" onclick="loadModule('inventory_overview', document.querySelectorAll('.nav-item')[3])">
+                <i class="ph ph-bell"></i>
+                <div class="notif-count" id="notif-count" style="display:none">0</div>
+            </div>
+            <button class="prism-btn" data-bs-toggle="modal" data-bs-target="#newProductModal">
+                <i class="ph ph-plus me-1"></i> Deploy New <span class="kbd ms-1">N</span>
+            </button>
+            <button class="prism-btn withdraw" onclick="location.reload()">
+                <i class="ph ph-arrows-clockwise me-1"></i> Reset
+            </button>
         </div>
-    </header>
-    <div id="prismContainer"></div>
-</main>
+    </div>
+    <div class="prism-content">
+        <div id="prismContainer"></div>
+    </div>
+</div>
 
-<!-- ── New Product Modal ── -->
+<!-- New Product Modal -->
 <div class="modal fade" id="newProductModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background:var(--bg-surface);color:var(--text-bright);border:1px solid #2b3035;">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title" style="color:var(--prism-cyan);font-weight:700;">INITIALIZE NEW ASSET</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-cyan);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-plus-circle me-2"></i>INITIALIZE NEW ASSET</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Product Name</label>
-                    <input type="text" class="form-control bg-dark text-white border-secondary" id="f-name" required>
+                <div class="mb-3"><label class="form-label">Product Name</label><input type="text" class="form-control" id="f-name" placeholder="e.g. iPhone 16 Pro" autocomplete="off"></div>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Category</label><input type="text" class="form-control" id="f-category" placeholder="e.g. Smartphones"></div>
+                    <div class="col-md-6"><label class="form-label">Supplier</label><input type="text" class="form-control" id="f-supplier" placeholder="e.g. Apple PH"></div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Category</label>
-                        <input type="text" class="form-control bg-dark text-white border-secondary" id="f-category" placeholder="e.g. Electronics">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Supplier</label>
-                        <input type="text" class="form-control bg-dark text-white border-secondary" id="f-supplier" placeholder="e.g. TechCorp">
-                    </div>
+                <div class="row g-3 mt-0">
+                    <div class="col-md-6"><label class="form-label">Initial Quantity</label><input type="number" class="form-control" id="f-qty" min="0" placeholder="0" oninput="updateNewCost()"></div>
+                    <div class="col-md-6"><label class="form-label">Unit Price (₱)</label><input type="number" step="0.01" class="form-control" id="f-price" min="0" placeholder="0.00" oninput="updateNewCost()"></div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Initial Quantity</label>
-                        <input type="number" class="form-control bg-dark text-white border-secondary" id="f-qty" min="0">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Unit Price (₱)</label>
-                        <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="f-price" min="0">
-                    </div>
+                <div id="new-cost-preview" style="display:none;margin-top:1rem;padding:10px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:0.81rem;color:var(--text-mid);">
+                    Initial stock value: <span id="new-cost-val" style="color:var(--prism-cyan);font-family:'JetBrains Mono',monospace;font-weight:700;"></span>
                 </div>
             </div>
-            <div class="modal-footer border-secondary">
+            <div class="modal-footer">
                 <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="prism-btn" onclick="submitNewProduct()">Compile & Save</button>
+                <button type="button" class="prism-btn" onclick="submitNewProduct()"><i class="ph ph-floppy-disk me-1"></i>Compile & Save</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ── Restock Calculator Modal ── -->
+<!-- Restock Calculator Modal -->
 <div class="modal fade" id="restockModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
-    <div class="modal-dialog modal-md">
-        <div class="modal-content" style="background:var(--bg-surface);color:var(--text-bright);border:1px solid #2b3035;">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title" style="color:var(--prism-amber);font-weight:700;">
-                    <i class="ph ph-calculator me-2"></i>RESTOCK CALCULATOR
-                </h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-amber);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-calculator me-2"></i>RESTOCK CALCULATOR</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:1.2rem;">
-                    Enter how many units you want to restock. The total cost will be calculated at the current unit price.
-                </p>
-                <div style="background:#0f1113;border:1px solid #2b3035;border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
-                    <div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;font-weight:800;margin-bottom:4px;">Product</div>
-                    <div id="rc-product-name" style="font-weight:600;font-size:1rem;"></div>
-                    <div id="rc-product-meta" style="font-size:0.8rem;color:var(--text-dim);margin-top:2px;"></div>
+                <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:1.1rem;">Enter how many units you want to restock. The total cost will be calculated at the current unit price.</p>
+                <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:1.1rem;">
+                    <div style="font-size:0.63rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-bottom:4px;">Target Product</div>
+                    <div id="rc-product-name" style="font-weight:700;font-size:0.97rem;"></div>
+                    <div id="rc-product-meta" style="font-size:0.78rem;color:var(--text-dim);margin-top:2px;"></div>
                 </div>
                 <div class="row g-3 mb-3">
-                    <div class="col-6">
-                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Quantity to Restock</label>
-                        <input type="number" class="form-control bg-dark text-white border-secondary" id="rc-qty" min="1" placeholder="e.g. 50" oninput="calcRestock()">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label" style="font-size:0.8rem;color:var(--text-dim);">Unit Price (₱)</label>
-                        <input type="number" step="0.01" class="form-control bg-dark text-white border-secondary" id="rc-price" min="0" oninput="calcRestock()">
-                    </div>
+                    <div class="col-6"><label class="form-label">Quantity to Restock</label><input type="number" class="form-control" id="rc-qty" min="1" placeholder="e.g. 50" oninput="calcRestock()"></div>
+                    <div class="col-6"><label class="form-label">Unit Price (₱)</label><input type="number" step="0.01" class="form-control" id="rc-price" min="0" oninput="calcRestock()"></div>
                 </div>
-                <!-- Result -->
-                <div style="background:rgba(38,196,202,0.06);border:1px solid rgba(38,196,202,0.2);border-radius:6px;padding:1.1rem 1.4rem;">
-                    <div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;font-weight:800;margin-bottom:6px;">Estimated Total Cost</div>
-                    <div id="rc-total" style="font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;color:var(--prism-cyan);">₱0.00</div>
-                    <div id="rc-breakdown" style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;"></div>
+                <div style="background:rgba(38,196,202,0.06);border:1px solid rgba(38,196,202,0.18);border-radius:8px;padding:1rem 1.2rem;">
+                    <div style="font-size:0.63rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-bottom:6px;">Estimated Total Cost</div>
+                    <div id="rc-total" style="font-family:'JetBrains Mono',monospace;font-size:1.85rem;font-weight:700;color:var(--prism-cyan);">₱0.00</div>
+                    <div id="rc-breakdown" style="font-size:0.77rem;color:var(--text-dim);margin-top:4px;"></div>
                 </div>
             </div>
-            <div class="modal-footer border-secondary">
+            <div class="modal-footer">
                 <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="prism-btn" onclick="confirmRestock()">Confirm & Add to Stock</button>
+                <button type="button" class="prism-btn" onclick="confirmRestock()"><i class="ph ph-check me-1"></i>Confirm & Add to Stock</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// ─── State ────────────────────────────────────────────────
-let restockTarget = null; // { id, name, price }
+let restockTarget = null;
+let currentModule = 'products';
+let currentNavEl  = null;
+let allProductsCache = [];
 
-// ─── Module Loader ────────────────────────────────────────
+// Clock
+function updateClock() {
+    const now = new Date();
+    const d = now.toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+    const t = now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('live-clock').textContent = d + ' · ' + t;
+}
+setInterval(updateClock, 1000); updateClock();
+
+// Toast
+function showToast(msg, type='success') {
+    const icons = {success:'ph-check-circle', error:'ph-x-circle', info:'ph-info'};
+    const el = document.createElement('div');
+    el.className = 'toast-item toast-'+type;
+    el.innerHTML = '<i class="ph '+icons[type]+' toast-icon"></i><span class="toast-msg">'+msg+'</span><span class="toast-close" onclick="this.parentElement.remove()"><i class="ph ph-x"></i></span><div class="toast-bar"></div>';
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(()=>{ el.classList.add('fade-out'); setTimeout(()=>el.remove(),300); }, 3500);
+}
+
+// Scroll to top
+window.addEventListener('scroll', ()=>{
+    document.getElementById('scrollTopBtn').style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
+
+// Keyboard shortcut: N = new product
+document.addEventListener('keydown', e=>{
+    if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    if (e.key==='n'||e.key==='N') new bootstrap.Modal(document.getElementById('newProductModal')).show();
+});
+
+// Status dot
+function setStatus(state) {
+    const dot = document.getElementById('status-dot');
+    const txt = document.getElementById('api-status');
+    txt.innerText = state;
+    const colors = {ONLINE:'var(--prism-green)', 'PROCESSING...':'var(--prism-amber)', 'BRIDGE FAILED':'var(--prism-red)', 'POLLING API...':'var(--prism-amber)', 'UPLOADING...':'var(--prism-amber)'};
+    const c = colors[state] || 'var(--prism-amber)';
+    dot.style.background = c; dot.style.boxShadow = '0 0 6px '+c;
+}
+
+// Notification badge
+function updateNotifBadge(data) {
+    const count = data.filter(r=>parseInt(r.Stock_qty)<=9).length;
+    const el = document.getElementById('notif-count');
+    if (count>0) { el.textContent=count; el.style.display='flex'; }
+    else el.style.display='none';
+}
+
+// Skeleton
+function showSkeleton(n=4) {
+    document.getElementById('prismContainer').innerHTML = Array(n).fill('<div class="skeleton skeleton-card"></div>').join('');
+}
+
+// Category color class
+function catClass(name) {
+    if (!name) return 'cat-default';
+    const n = name.toLowerCase();
+    if (n.includes('smartphone')||n.includes('mobile')||n.includes('phone')) return 'cat-smartphones';
+    if (n.includes('gaming')||n.includes('console')||n.includes('game'))     return 'cat-gaming';
+    if (n.includes('wearable')||n.includes('watch'))                          return 'cat-wearables';
+    if (n.includes('audio')||n.includes('earbuds')||n.includes('headphone'))  return 'cat-audio';
+    return 'cat-default';
+}
+
+// Module loader
 async function loadModule(action, element) {
-    const status    = document.getElementById('api-status');
-    const container = document.getElementById('prismContainer');
-    const title     = document.getElementById('module-title');
-
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     if (element) element.classList.add('active');
-
-    const titleMap = {
-        products: 'PRODUCTS', categories: 'CATEGORIES',
-        transactions: 'TRANSACTIONS', suppliers: 'SUPPLIERS',
-        inventory_overview: 'INVENTORY OVERVIEW'
-    };
-    title.innerText  = `Project Argo: ${titleMap[action] || action.toUpperCase()}`;
-    status.innerText = 'POLLING API...';
-
+    currentModule = action; currentNavEl = element;
+    const titleMap = {products:'PRODUCTS',categories:'CATEGORIES',transactions:'TRANSACTIONS',suppliers:'SUPPLIERS',inventory_overview:'INVENTORY OVERVIEW'};
+    document.getElementById('module-title').innerText = 'Project Argo: '+(titleMap[action]||action.toUpperCase());
+    document.getElementById('record-count').innerText = '';
+    setStatus('POLLING API...');
+    showSkeleton(action==='inventory_overview'?2:4);
     try {
-        const res  = await fetch(`api.php?action=${action}`);
+        const res  = await fetch('api.php?action='+action);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
-
-        container.innerHTML = '';
-        if      (action === 'products')           renderProducts(data);
-        else if (action === 'transactions')        renderTransactions(data);
-        else if (action === 'inventory_overview')  renderInventoryOverview(data);
-        else                                       renderTable(data);
-
-        status.innerText = 'ONLINE';
-    } catch (err) {
-        status.innerText    = 'BRIDGE FAILED';
-        container.innerHTML = `<div class="text-danger">SYSTEM HALT: ${err.message}</div>`;
+        document.getElementById('record-count').innerText = data.length+' record'+(data.length!==1?'s':'');
+        document.getElementById('prismContainer').innerHTML = '';
+        if      (action==='products')           { allProductsCache=data; updateNotifBadge(data); renderProductsWithSearch(data); }
+        else if (action==='transactions')        renderTransactions(data);
+        else if (action==='inventory_overview')  renderInventoryOverview(data);
+        else                                     renderTable(data);
+        setStatus('ONLINE');
+    } catch(err) {
+        setStatus('BRIDGE FAILED');
+        document.getElementById('prismContainer').innerHTML = '<div class="empty-state"><i class="ph ph-warning-circle" style="color:var(--prism-red)"></i><p style="color:var(--prism-red)">SYSTEM HALT: '+err.message+'</p></div>';
     }
 }
 
-// ─── Stock Management ─────────────────────────────────────
+// Stock management
 async function manage(type, id) {
-    const label = type === 'IN' ? 'Add' : 'Withdraw';
-    const qty   = prompt(`Enter quantity to ${label}:`);
-    if (!qty || isNaN(qty) || qty <= 0) return;
-
-    document.getElementById('api-status').innerText = 'PROCESSING...';
-
+    const label = type==='IN'?'Add':'Withdraw';
+    const qty = prompt('Enter quantity to '+label+':');
+    if (!qty||isNaN(qty)||qty<=0) return;
+    setStatus('PROCESSING...');
     try {
         const fd = new FormData();
-        fd.append('action',           'manage_stock');
-        fd.append('Product_id',       id);
-        fd.append('Transaction_qty',  qty);
-        fd.append('Transaction_type', type);
-
-        const res    = await fetch('process.php', { method: 'POST', body: fd });
+        fd.append('action','manage_stock'); fd.append('Product_id',id);
+        fd.append('Transaction_qty',qty); fd.append('Transaction_type',type);
+        const res = await fetch('process.php',{method:'POST',body:fd});
         const result = await res.json();
-
-        if (result.status === 'success') {
-            loadModule('products', document.querySelector('.nav-item.active'));
-        } else {
-            alert('Error: ' + result.error);
-            document.getElementById('api-status').innerText = 'ONLINE';
-        }
-    } catch {
-        alert('Bridge Failed: Could not reach process.php');
-        document.getElementById('api-status').innerText = 'BRIDGE FAILED';
-    }
+        if (result.status==='success') { showToast(label+' of '+qty+' unit(s) recorded.','success'); loadModule('products',document.querySelector('.nav-item.active')); }
+        else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
 }
 
-// ─── New Product ──────────────────────────────────────────
+// New cost preview
+function updateNewCost() {
+    const q = parseFloat(document.getElementById('f-qty').value)||0;
+    const p = parseFloat(document.getElementById('f-price').value)||0;
+    const preview = document.getElementById('new-cost-preview');
+    if (q>0&&p>0) { preview.style.display='block'; document.getElementById('new-cost-val').textContent='₱'+(q*p).toLocaleString('en-PH',{minimumFractionDigits:2}); }
+    else preview.style.display='none';
+}
+
+// Submit new product
 async function submitNewProduct() {
-    const name     = document.getElementById('f-name').value.trim();
-    const category = document.getElementById('f-category').value.trim();
-    const supplier = document.getElementById('f-supplier').value.trim();
-    const qty      = document.getElementById('f-qty').value;
-    const price    = document.getElementById('f-price').value;
-
-    if (!name || !category || !supplier || qty === '' || price === '') {
-        alert('Please fill in all fields.'); return;
-    }
-
-    document.getElementById('api-status').innerText = 'UPLOADING...';
-
-    const fd = new FormData();
-    fd.append('action', 'create_product');
-    fd.append('product_name',  name);
-    fd.append('category_name', category);
-    fd.append('supplier_name', supplier);
-    fd.append('quantity',      qty);
-    fd.append('price',         price);
-
+    const name=document.getElementById('f-name').value.trim();
+    const category=document.getElementById('f-category').value.trim();
+    const supplier=document.getElementById('f-supplier').value.trim();
+    const qty=document.getElementById('f-qty').value;
+    const price=document.getElementById('f-price').value;
+    if (!name||!category||!supplier||qty===''||price==='') { showToast('Please fill in all fields.','error'); return; }
+    setStatus('UPLOADING...');
+    const fd=new FormData();
+    fd.append('action','create_product'); fd.append('product_name',name);
+    fd.append('category_name',category); fd.append('supplier_name',supplier);
+    fd.append('quantity',qty); fd.append('price',price);
     try {
-        const res    = await fetch('process.php', { method: 'POST', body: fd });
-        const result = await res.json();
-
-        if (result.status === 'success') {
-            const m = bootstrap.Modal.getInstance(document.getElementById('newProductModal'))
-                   || new bootstrap.Modal(document.getElementById('newProductModal'));
+        const res=await fetch('process.php',{method:'POST',body:fd});
+        const result=await res.json();
+        if (result.status==='success') {
+            const m=bootstrap.Modal.getInstance(document.getElementById('newProductModal'))||new bootstrap.Modal(document.getElementById('newProductModal'));
             m.hide();
-            ['f-name','f-category','f-supplier','f-qty','f-price'].forEach(i => document.getElementById(i).value = '');
-            loadModule('products', document.querySelector('.nav-item.active'));
-        } else {
-            alert('Database Error: ' + result.error);
-            document.getElementById('api-status').innerText = 'ONLINE';
-        }
-    } catch {
-        alert('Bridge Failed: Could not reach process.php');
-        document.getElementById('api-status').innerText = 'BRIDGE FAILED';
-    }
+            ['f-name','f-category','f-supplier','f-qty','f-price'].forEach(i=>document.getElementById(i).value='');
+            document.getElementById('new-cost-preview').style.display='none';
+            showToast('"'+name+'" deployed successfully.','success');
+            loadModule('products',document.querySelector('.nav-item.active'));
+        } else { showToast('Database Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
 }
 
-// ─── Restock Calculator ───────────────────────────────────
+// Restock modal
 function openRestockModal(id, name, price) {
-    restockTarget = { id, name, price };
-    document.getElementById('rc-product-name').innerText = name;
-    document.getElementById('rc-product-meta').innerText = `Unit Price: ₱${parseFloat(price).toLocaleString()}`;
-    document.getElementById('rc-qty').value   = '';
-    document.getElementById('rc-price').value = parseFloat(price).toFixed(2);
-    document.getElementById('rc-total').innerText     = '₱0.00';
-    document.getElementById('rc-breakdown').innerText = '';
+    restockTarget={id,name,price};
+    document.getElementById('rc-product-name').innerText=name;
+    document.getElementById('rc-product-meta').innerText='Current unit price: ₱'+parseFloat(price).toLocaleString();
+    document.getElementById('rc-qty').value='';
+    document.getElementById('rc-price').value=parseFloat(price).toFixed(2);
+    document.getElementById('rc-total').innerText='₱0.00';
+    document.getElementById('rc-breakdown').innerText='';
     new bootstrap.Modal(document.getElementById('restockModal')).show();
 }
 
 function calcRestock() {
-    const qty   = parseFloat(document.getElementById('rc-qty').value)   || 0;
-    const price = parseFloat(document.getElementById('rc-price').value) || 0;
-    const total = qty * price;
-    document.getElementById('rc-total').innerText     = '₱' + total.toLocaleString('en-PH', { minimumFractionDigits: 2 });
-    document.getElementById('rc-breakdown').innerText = qty > 0 && price > 0
-        ? `${qty} units × ₱${price.toLocaleString()} per unit`
-        : '';
+    const qty=parseFloat(document.getElementById('rc-qty').value)||0;
+    const price=parseFloat(document.getElementById('rc-price').value)||0;
+    const total=qty*price;
+    document.getElementById('rc-total').innerText='₱'+total.toLocaleString('en-PH',{minimumFractionDigits:2});
+    document.getElementById('rc-breakdown').innerText=(qty>0&&price>0)?qty+' units × ₱'+price.toLocaleString()+' per unit':'';
 }
 
 async function confirmRestock() {
     if (!restockTarget) return;
-    const qty = parseInt(document.getElementById('rc-qty').value);
-    if (!qty || qty <= 0) { alert('Please enter a valid quantity.'); return; }
-
-    document.getElementById('api-status').innerText = 'PROCESSING...';
-
-    const fd = new FormData();
-    fd.append('action',           'manage_stock');
-    fd.append('Product_id',       restockTarget.id);
-    fd.append('Transaction_qty',  qty);
-    fd.append('Transaction_type', 'IN');
-
+    const rawQty=document.getElementById('rc-qty').value.trim();
+    const qty=parseInt(rawQty,10);
+    if (!rawQty||isNaN(qty)||qty<=0) { showToast('Please enter a valid quantity greater than 0.','error'); return; }
+    setStatus('PROCESSING...');
+    const fd=new FormData();
+    fd.append('action','manage_stock'); fd.append('Product_id',restockTarget.id);
+    fd.append('Transaction_qty',qty); fd.append('Transaction_type','IN');
     try {
-        const res    = await fetch('process.php', { method: 'POST', body: fd });
-        const result = await res.json();
-
-        if (result.status === 'success') {
+        const res=await fetch('process.php',{method:'POST',body:fd});
+        const result=await res.json();
+        if (result.status==='success') {
             bootstrap.Modal.getInstance(document.getElementById('restockModal')).hide();
-            // Refresh whatever tab is open
-            const activeNav = document.querySelector('.nav-item.active');
-            const activeAction = activeNav ? activeNav.getAttribute('data-action') : 'products';
-            loadModule(activeAction || 'inventory_overview', activeNav);
-        } else {
-            alert('Error: ' + result.error);
-            document.getElementById('api-status').innerText = 'ONLINE';
-        }
-    } catch {
-        alert('Bridge Failed: Could not reach process.php');
-        document.getElementById('api-status').innerText = 'BRIDGE FAILED';
-    }
+            showToast('Restocked '+qty+' unit(s) of "'+restockTarget.name+'".','success');
+            loadModule(currentModule,currentNavEl);
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
 }
 
-// ─── Renderers ────────────────────────────────────────────
+// Products with search/filter
+function renderProductsWithSearch(data) {
+    const container=document.getElementById('prismContainer');
+    container.innerHTML='';
+    if (!data||data.length===0) { container.innerHTML='<div class="empty-state"><i class="ph ph-cube"></i><p>No products found.</p></div>'; return; }
+    const bar=document.createElement('div');
+    bar.className='search-bar-wrap';
+    bar.innerHTML='<div class="search-input-wrap"><i class="ph ph-magnifying-glass"></i><input class="search-input" id="product-search" type="text" placeholder="Search products, categories, suppliers…" oninput="filterProducts()"></div>'+
+        '<button class="filter-btn active-filter" id="filter-all" onclick="setFilter(\'all\')">All</button>'+
+        '<button class="filter-btn" id="filter-ok" onclick="setFilter(\'ok\')">In Stock</button>'+
+        '<button class="filter-btn" id="filter-low" onclick="setFilter(\'low\')">Low Stock</button>'+
+        '<button class="filter-btn" id="filter-out" onclick="setFilter(\'out\')">Sold Out</button>'+
+        '<div class="results-count" id="product-count">'+data.length+' products</div>';
+    container.appendChild(bar);
+    const list=document.createElement('div'); list.id='product-list';
+    container.appendChild(list);
+    window._productFilter='all';
+    renderProductList(data);
+}
 
-function renderProducts(data) {
-    const container = document.getElementById('prismContainer');
-    container.innerHTML = '';
-
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-dim)'>No products found.</p>";
-        return;
-    }
-
-    data.forEach(item => {
-        const qty      = parseInt(item.Stock_qty);
-        const soldOut  = qty === 0;
-        const lowStock = qty > 0 && qty < 10;
-
-        const ledClass  = soldOut ? 'led-gray' : lowStock ? 'led-amber' : 'led-cyan';
-        const cardClass = soldOut ? 'soldout'  : lowStock ? 'low-stock' : '';
-
-        const extraTag = soldOut
-            ? `<span class="soldout-tag"><i class="ph ph-x-circle"></i> Sold Out</span>`
-            : lowStock
-            ? `<span class="lowstock-tag"><i class="ph ph-warning"></i> Low Stock</span>`
-            : '';
-
-        container.innerHTML += `
-        <div class="unit-card ${cardClass}">
-            <div class="d-flex align-items-center">
-                <div class="status-led ${ledClass}"></div>
-                <div class="unit-identity">
-                    <div class="unit-title">${item.product_name} ${extraTag}</div>
-                    <span class="unit-badge">${item.Category_name || 'General'}</span>
-                </div>
-            </div>
-            <div class="metric-wrap">
-                <div>
-                    <div class="m-head">Revision</div>
-                    <div class="m-body">P00${item.Product_id}</div>
-                </div>
-                <div>
-                    <div class="m-head">Objects</div>
-                    <div class="m-body fw-bold ${soldOut ? 'text-danger' : 'text-white'}">${qty}</div>
-                </div>
-                <div>
-                    <div class="m-head">Supplier</div>
-                    <div class="m-body" style="font-size:0.8rem;">${item.supplier_name || '—'}</div>
-                </div>
-            </div>
-            <div class="admin-controls d-flex gap-2 align-items-center">
-                <div class="m-body me-3">₱${parseFloat(item.Unit_price).toLocaleString()}</div>
-                <button class="prism-btn" onclick="manage('IN', ${item.Product_id})">Add</button>
-                <button class="prism-btn withdraw" onclick="manage('OUT', ${item.Product_id})" ${soldOut ? 'disabled' : ''}>Withdraw</button>
-            </div>
-        </div>`;
+function setFilter(f) {
+    window._productFilter=f;
+    ['all','ok','low','out'].forEach(k=>{
+        const el=document.getElementById('filter-'+k);
+        if(el) el.classList.toggle('active-filter',k===f);
     });
+    filterProducts();
 }
 
+function filterProducts() {
+    const q=(document.getElementById('product-search')?.value||'').toLowerCase();
+    const f=window._productFilter||'all';
+    const filtered=allProductsCache.filter(item=>{
+        const qty=parseInt(item.Stock_qty);
+        const matchQ=!q||item.product_name.toLowerCase().includes(q)||(item.Category_name||'').toLowerCase().includes(q)||(item.supplier_name||'').toLowerCase().includes(q);
+        const matchF=f==='all'||(f==='ok'&&qty>=10)||(f==='low'&&qty>0&&qty<10)||(f==='out'&&qty===0);
+        return matchQ&&matchF;
+    });
+    document.getElementById('product-count').textContent=filtered.length+' product'+(filtered.length!==1?'s':'');
+    renderProductList(filtered);
+}
+
+function renderProductList(data) {
+    const list=document.getElementById('product-list');
+    if (!list) return;
+    if (!data||data.length===0) { list.innerHTML='<div class="empty-state"><i class="ph ph-magnifying-glass"></i><p>No products match your search.</p></div>'; return; }
+    list.innerHTML=data.map((item,idx)=>{
+        const qty=parseInt(item.Stock_qty);
+        const soldOut=qty===0, lowStock=qty>0&&qty<10;
+        const ledClass=soldOut?'led-gray':lowStock?'led-amber':'led-cyan';
+        const cardClass=soldOut?'soldout':lowStock?'low-stock':'';
+        const cc=catClass(item.Category_name);
+        const extraTag=soldOut?'<span class="soldout-tag"><i class="ph ph-x-circle"></i> Sold Out</span>':lowStock?'<span class="lowstock-tag"><i class="ph ph-warning"></i> Low Stock</span>':'';
+        return '<div class="unit-card '+cardClass+'" style="animation-delay:'+idx*0.04+'s">'+
+            '<div class="d-flex align-items-center" style="min-width:200px"><div class="status-led '+ledClass+'"></div>'+
+            '<div class="unit-identity"><div class="unit-title">'+item.product_name+' '+extraTag+'</div>'+
+            '<span class="unit-badge '+cc+'">'+(item.Category_name||'General')+'</span></div></div>'+
+            '<div class="metric-wrap">'+
+            '<div><div class="m-head">Revision</div><div class="m-body">P00'+item.Product_id+'</div></div>'+
+            '<div><div class="m-head">Objects</div><div class="m-body fw-bold'+(soldOut?' text-danger':'')+'" style="'+(lowStock?'color:var(--prism-amber)':'')+'">'+qty+'</div></div>'+
+            '<div><div class="m-head">Supplier</div><div class="m-body" style="font-size:0.8rem">'+(item.supplier_name||'—')+'</div></div>'+
+            '<div><div class="m-head">Unit Price</div><div class="m-body">₱'+parseFloat(item.Unit_price).toLocaleString()+'</div></div>'+
+            '</div>'+
+            '<div class="d-flex gap-2 align-items-center">'+
+            '<button class="prism-btn" onclick="manage(\'IN\','+item.Product_id+')"><i class="ph ph-plus me-1"></i>Add</button>'+
+            '<button class="prism-btn withdraw" onclick="manage(\'OUT\','+item.Product_id+')"'+(soldOut?' disabled':'')+'>'+
+            '<i class="ph ph-minus me-1"></i>Withdraw</button></div></div>';
+    }).join('');
+}
+
+// Animated counter
+function animateCount(el, target) {
+    if (!el) return;
+    const dur=600, step=(ts,s)=>{ if(!s)s=ts; const p=Math.min((ts-s)/dur,1); el.textContent=Math.floor(p*target).toLocaleString(); if(p<1)requestAnimationFrame(ts=>step(ts,s)); else el.textContent=target.toLocaleString(); };
+    requestAnimationFrame(ts=>step(ts));
+}
+
+// Inventory overview
 function renderInventoryOverview(data) {
-    const container = document.getElementById('prismContainer');
-    container.innerHTML = '';
-
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-dim)'>No inventory data found.</p>";
-        return;
-    }
-
-    // Summary stats
-    const totalProducts  = data.length;
-    const totalValue     = data.reduce((s, r) => s + parseFloat(r.stock_value || 0), 0);
-    const totalSold      = data.reduce((s, r) => s + parseInt(r.total_sold || 0), 0);
-    const soldOutCount   = data.filter(r => parseInt(r.Stock_qty) === 0).length;
-    const lowStockCount  = data.filter(r => parseInt(r.Stock_qty) > 0 && parseInt(r.Stock_qty) < 10).length;
-
-    // Max stock for bar scaling
-    const maxQty = Math.max(...data.map(r => parseInt(r.Stock_qty) || 0), 1);
-
-    // Attach data-action to nav items for restock refresh
-    document.querySelectorAll('.nav-item').forEach(el => {
-        const onclick = el.getAttribute('onclick') || '';
-        const match   = onclick.match(/'([^']+)'/);
-        if (match) el.setAttribute('data-action', match[1]);
-    });
-
-    container.innerHTML = `
-    <!-- Summary Cards -->
+    const container=document.getElementById('prismContainer');
+    container.innerHTML='';
+    if (!data||data.length===0) { container.innerHTML='<div class="empty-state"><i class="ph ph-chart-bar"></i><p>No inventory data found.</p></div>'; return; }
+    const totalProducts=data.length;
+    const totalValue=data.reduce((s,r)=>s+parseFloat(r.stock_value||0),0);
+    const totalSold=data.reduce((s,r)=>s+parseInt(r.total_sold||0),0);
+    const soldOutCount=data.filter(r=>parseInt(r.Stock_qty)===0).length;
+    const lowCount=data.filter(r=>parseInt(r.Stock_qty)>0&&parseInt(r.Stock_qty)<10).length;
+    const maxQty=Math.max(...data.map(r=>parseInt(r.Stock_qty)||0),1);
+    container.innerHTML=`
     <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-3">
-            <div class="stat-card">
-                <div class="stat-value" style="color:var(--prism-cyan)">${totalProducts}</div>
-                <div class="stat-label">Total Products</div>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="stat-card">
-                <div class="stat-value" style="color:var(--prism-green)">₱${totalValue.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
-                <div class="stat-label">Total Stock Value</div>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="stat-card">
-                <div class="stat-value" style="color:var(--prism-amber)">${totalSold}</div>
-                <div class="stat-label">Units Sold (all time)</div>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="stat-card">
-                <div class="stat-value" style="color:var(--prism-red)">${soldOutCount} <span style="font-size:1rem;color:var(--prism-amber)">/ ${lowStockCount} low</span></div>
-                <div class="stat-label">Sold Out / Low Stock</div>
-            </div>
-        </div>
+        <div class="col-6 col-xl-3"><div class="stat-card s-cyan"><i class="ph ph-cube stat-icon"></i><div class="stat-value" id="sc-prod" style="color:var(--prism-cyan)">0</div><div class="stat-label">Total Products</div></div></div>
+        <div class="col-6 col-xl-3"><div class="stat-card s-green"><i class="ph ph-currency-dollar stat-icon"></i><div class="stat-value" id="sc-val" style="color:var(--prism-green);font-size:1.35rem">₱0</div><div class="stat-label">Total Stock Value</div></div></div>
+        <div class="col-6 col-xl-3"><div class="stat-card s-amber"><i class="ph ph-trend-up stat-icon"></i><div class="stat-value" id="sc-sold" style="color:var(--prism-amber)">0</div><div class="stat-label">Units Sold (All Time)</div></div></div>
+        <div class="col-6 col-xl-3"><div class="stat-card s-red"><i class="ph ph-warning stat-icon"></i><div class="stat-value" style="color:var(--prism-red)"><span id="sc-out">0</span><span style="font-size:1rem;color:var(--prism-amber)"> / <span id="sc-low">0</span></span></div><div class="stat-label">Sold Out / Low Stock</div></div></div>
     </div>
-
-    <!-- Product Table -->
     <div class="table-responsive">
-    <table class="table table-dark table-hover border-secondary" style="font-size:0.88rem;">
-        <thead>
-            <tr>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Product</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Supplier</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Stock Left</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Stock Level</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Sold</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Unit Price</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Stock Value</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Status</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;font-weight:800;">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-    ` + data.map(row => {
-        const qty       = parseInt(row.Stock_qty)  || 0;
-        const sold      = parseInt(row.total_sold) || 0;
-        const value     = parseFloat(row.stock_value) || 0;
-        const price     = parseFloat(row.Unit_price)  || 0;
-        const soldOut   = qty === 0;
-        const lowStock  = qty > 0 && qty < 10;
-        const pct       = Math.round((qty / maxQty) * 100);
-        const barColor  = soldOut ? '#3a3f45' : lowStock ? 'var(--prism-amber)' : 'var(--prism-cyan)';
-        const statusPill = soldOut
-            ? `<span class="status-pill pill-out">Sold Out</span>`
-            : lowStock
-            ? `<span class="status-pill pill-low">Low Stock</span>`
-            : `<span class="status-pill pill-ok">In Stock</span>`;
-
-        return `<tr>
-            <td class="py-3 fw-bold">${row.product_name}</td>
-            <td class="py-3" style="color:var(--text-dim)">${row.supplier_name || '—'}</td>
-            <td class="py-3 m-body ${soldOut ? 'text-danger' : lowStock ? '' : ''}" style="${lowStock ? 'color:var(--prism-amber)' : ''}">${qty}</td>
-            <td class="py-3">
-                <div class="stock-bar-wrap">
-                    <div class="stock-bar-bg">
-                        <div class="stock-bar-fill" style="width:${pct}%;background:${barColor}"></div>
-                    </div>
-                    <div style="font-size:0.7rem;color:var(--text-dim);margin-top:3px;">${pct}%</div>
-                </div>
-            </td>
-            <td class="py-3 m-body" style="color:var(--prism-amber)">${sold > 0 ? sold : '—'}</td>
-            <td class="py-3 m-body">₱${price.toLocaleString()}</td>
-            <td class="py-3 m-body" style="color:var(--prism-green)">₱${value.toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
-            <td class="py-3">${statusPill}</td>
-            <td class="py-3">
-                <button class="prism-btn amber" style="font-size:0.7rem;padding:4px 10px;"
-                    onclick="openRestockModal(${row.Product_id}, '${row.product_name.replace(/'/g,"\\'")}', ${price})">
-                    <i class="ph ph-calculator"></i> Restock
-                </button>
-            </td>
-        </tr>`;
-    }).join('') + `
-        </tbody>
-    </table>
-    </div>`;
+    <table class="table table-dark table-hover">
+        <thead><tr><th>Product</th><th>Supplier</th><th>Stock Left</th><th>Stock Level</th><th>Sold</th><th>Unit Price</th><th>Stock Value</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>`+data.map(row=>{
+        const qty=parseInt(row.Stock_qty)||0,sold=parseInt(row.total_sold)||0;
+        const value=parseFloat(row.stock_value)||0,price=parseFloat(row.Unit_price)||0;
+        const soldOut=qty===0,lowStock=qty>0&&qty<10;
+        const pct=Math.round((qty/maxQty)*100);
+        const barColor=soldOut?'#2a3038':lowStock?'var(--prism-amber)':'var(--prism-cyan)';
+        const pill=soldOut?'<span class="status-pill pill-out">Sold Out</span>':lowStock?'<span class="status-pill pill-low">Low Stock</span>':'<span class="status-pill pill-ok">In Stock</span>';
+        return '<tr><td class="fw-bold">'+row.product_name+'</td><td style="color:var(--text-mid)">'+(row.supplier_name||'—')+'</td>'+
+            '<td class="m-body'+(soldOut?' text-danger':'')+'" style="'+(lowStock?'color:var(--prism-amber)':'')+'">'+qty+'</td>'+
+            '<td><div class="stock-bar-wrap"><div class="stock-bar-bg"><div class="stock-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div><div style="font-size:0.67rem;color:var(--text-dim);margin-top:3px">'+pct+'%</div></div></td>'+
+            '<td class="m-body" style="color:var(--prism-amber)">'+(sold>0?sold:'—')+'</td>'+
+            '<td class="m-body">₱'+price.toLocaleString()+'</td>'+
+            '<td class="m-body" style="color:var(--prism-green)">₱'+value.toLocaleString('en-PH',{maximumFractionDigits:0})+'</td>'+
+            '<td>'+pill+'</td>'+
+            '<td><button class="prism-btn amber" style="font-size:0.67rem;padding:5px 10px" onclick="openRestockModal('+row.Product_id+',\''+row.product_name.replace(/'/g,"\\'")+'\',' +price+')"><i class="ph ph-calculator"></i> Restock</button></td></tr>';
+    }).join('')+`</tbody></table></div>`;
+    setTimeout(()=>{
+        animateCount(document.getElementById('sc-prod'),totalProducts);
+        animateCount(document.getElementById('sc-sold'),totalSold);
+        animateCount(document.getElementById('sc-out'),soldOutCount);
+        animateCount(document.getElementById('sc-low'),lowCount);
+        const valEl=document.getElementById('sc-val');
+        const dur=600,step=(ts,s)=>{ if(!s)s=ts; const p=Math.min((ts-s)/dur,1); valEl.textContent='₱'+Math.floor(p*totalValue).toLocaleString('en-PH'); if(p<1)requestAnimationFrame(ts=>step(ts,s)); else valEl.textContent='₱'+totalValue.toLocaleString('en-PH',{maximumFractionDigits:0}); };
+        requestAnimationFrame(ts=>step(ts));
+    },50);
 }
 
+// Transactions
 function renderTransactions(data) {
-    const container = document.getElementById('prismContainer');
-
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-dim)'>No transactions recorded yet.</p>";
-        return;
-    }
-
-    const typeLabel = { IN: 'Add', OUT: 'Withdraw', NEW: 'New Product' };
-    const typeBadge = { IN: 'tx-in', OUT: 'tx-out', NEW: 'tx-new' };
-
-    let html = `<div class="table-responsive">
-        <table class="table table-dark table-hover border-secondary" style="font-size:0.9rem;">
-            <thead><tr>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">ID</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Product</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Type</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Quantity</th>
-                <th class="text-dim" style="font-size:0.7rem;text-transform:uppercase;">Date & Time</th>
-            </tr></thead><tbody>`;
-
-    data.forEach(row => {
-        const t        = row.Transaction_type || 'IN';
-        const badge    = typeBadge[t] || 'tx-in';
-        const label    = typeLabel[t] || t;
-        const qty      = (t === 'OUT' ? '−' : '+') + row.Transaction_qty;
-        const qtyColor = t === 'OUT' ? 'color:var(--prism-red)' : 'color:var(--prism-green)';
-        const date     = new Date(row.transaction_date).toLocaleString('en-PH', {
-            year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
-        });
-        html += `<tr>
-            <td class="py-3 m-body" style="color:var(--text-dim)">#${row.Transaction_id}</td>
-            <td class="py-3 fw-bold">${row.product_name || '—'}</td>
-            <td class="py-3"><span class="tx-badge ${badge}">${label}</span></td>
-            <td class="py-3 m-body" style="${qtyColor}">${qty}</td>
-            <td class="py-3" style="color:var(--text-dim);font-size:0.85rem;">${date}</td>
-        </tr>`;
+    const container=document.getElementById('prismContainer');
+    if (!data||data.length===0) { container.innerHTML='<div class="empty-state"><i class="ph ph-arrows-left-right"></i><p>No transactions recorded yet.</p></div>'; return; }
+    const typeLabel={IN:'Add',OUT:'Withdraw',NEW:'New Product'};
+    const typeBadge={IN:'tx-in',OUT:'tx-out',NEW:'tx-new'};
+    window._txData=data;
+    container.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:1rem;gap:8px;">'+
+        '<button class="filter-btn" onclick="exportTransactions()"><i class="ph ph-download-simple me-1"></i>Export CSV</button>'+
+        '<button class="filter-btn" onclick="window.print()"><i class="ph ph-printer me-1"></i>Print</button></div>';
+    let html='<div class="table-responsive"><table class="table table-dark table-hover"><thead><tr><th>ID</th><th>Product</th><th>Type</th><th>Quantity</th><th>Date & Time</th></tr></thead><tbody>';
+    data.forEach(row=>{
+        const t=row.Transaction_type||'IN';
+        const badge=typeBadge[t]||'tx-in',label=typeLabel[t]||t;
+        const qty=(t==='OUT'?'−':'+')+row.Transaction_qty;
+        const qtyColor=t==='OUT'?'color:var(--prism-red)':'color:var(--prism-green)';
+        const date=new Date(row.transaction_date).toLocaleString('en-PH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        html+='<tr><td class="m-body" style="color:var(--text-dim)">#'+row.Transaction_id+'</td><td class="fw-bold">'+(row.product_name||'—')+'</td><td><span class="tx-badge '+badge+'">'+label+'</span></td><td class="m-body" style="'+qtyColor+'">'+qty+'</td><td style="color:var(--text-mid);font-size:0.82rem">'+date+'</td></tr>';
     });
-
-    html += `</tbody></table></div>`;
-    container.innerHTML = html;
+    html+='</tbody></table></div>';
+    container.innerHTML+=html;
 }
 
+function exportTransactions() {
+    const data=window._txData; if(!data) return;
+    const headers=['ID','Product','Type','Quantity','Date'];
+    const rows=data.map(r=>[r.Transaction_id,'"'+(r.product_name||'').replace(/"/g,'""')+'"',r.Transaction_type,r.Transaction_qty,'"'+new Date(r.transaction_date).toLocaleString('en-PH')+'"']);
+    const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='transactions_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Transactions exported as CSV.','info');
+}
+
+// Generic table
 function renderTable(data) {
-    const container = document.getElementById('prismContainer');
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p style='color:var(--text-dim)'>No records found in this sector.</p>";
-        return;
-    }
-
-    let html = `<div class="table-responsive">
-        <table class="table table-dark table-hover border-secondary" style="font-size:0.9rem;">
-            <thead><tr>`;
-
-    Object.keys(data[0]).forEach(key => {
-        html += `<th class="text-dim text-uppercase" style="font-size:0.7rem;">${key.replace(/_/g,' ')}</th>`;
-    });
-
-    html += `</tr></thead><tbody>`;
-    data.forEach(row => {
-        html += `<tr>`;
-        Object.values(row).forEach(val => { html += `<td class="py-3 m-body">${val ?? '—'}</td>`; });
-        html += `</tr>`;
-    });
-    html += `</tbody></table></div>`;
-    container.innerHTML = html;
+    const container=document.getElementById('prismContainer');
+    if (!data||data.length===0) { container.innerHTML='<div class="empty-state"><i class="ph ph-table"></i><p>No records found in this sector.</p></div>'; return; }
+    let html='<div class="table-responsive"><table class="table table-dark table-hover"><thead><tr>';
+    Object.keys(data[0]).forEach(k=>{ html+='<th>'+k.replace(/_/g,' ')+'</th>'; });
+    html+='</tr></thead><tbody>';
+    data.forEach(row=>{ html+='<tr>'; Object.values(row).forEach(val=>{ html+='<td class="m-body">'+(val??'—')+'</td>'; }); html+='</tr>'; });
+    html+='</tbody></table></div>';
+    container.innerHTML=html;
 }
 
-window.onload = () => loadModule('products', document.querySelector('.nav-item.active'));
+window.onload = () => { setFilter('all'); loadModule('products', document.querySelector('.nav-item.active')); };
 </script>
 </body>
 </html>
