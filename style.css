@@ -1,0 +1,43 @@
+/*
+ * style.css — Prism StockPro
+ * Supplemental styles linked from index.html.
+ * Core theme variables and component styles live in index.html <style>
+ * to support live CSS variable switching without a page reload.
+ */
+
+/* ── Base reset ────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+a    { text-decoration: none; }
+button { border: none; outline: none; background: none; }
+img { max-width: 100%; display: block; }
+
+/* ── Bootstrap dark table override for light mode ─────────── */
+[data-theme="light"] .table-dark {
+    --bs-table-color: #1e293b;
+    --bs-table-striped-color: #1e293b;
+}
+
+/* ── Accessibility: focus ring ─────────────────────────────── */
+:focus-visible {
+    outline: 2px solid #26c4ca;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ── Smooth transitions on theme switch ────────────────────── */
+.prism-sidebar,
+.prism-header,
+.unit-card,
+.stat-card,
+.toast-item,
+.modal-content,
+.form-control,
+.filter-btn,
+.prism-btn,
+.nav-item {
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+}
+
+/* ── Utility ───────────────────────────────────────────────── */
+.text-danger { color: #ff5c5c !important; }
+.fw-bold     { font-weight: 700 !important; }

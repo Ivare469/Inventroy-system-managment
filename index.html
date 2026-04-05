@@ -1,31 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Prism | StockPro Admin</title>
+    <title>Miku Stocks | Miku Stock Pro Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
     <style>
-        :root {
+        /* ── Theme Variables ─────────────────────────────── */
+        :root[data-theme="dark"] {
             --bg-deep: #0a0c0e; --bg-surface: #111518; --bg-card: #161b1f; --bg-hover: #1c2228;
             --prism-cyan: #26c4ca; --prism-cyan-dim: rgba(38,196,202,0.12);
             --prism-red: #ff5c5c; --prism-red-dim: rgba(255,92,92,0.1);
             --prism-green: #4caf88; --prism-amber: #f5a623; --prism-purple: #9b7fe8;
             --text-dim: #5a6472; --text-mid: #8a95a0; --text-bright: #dde3e8;
             --border: #1e2530; --border-mid: #2b3540;
-            --sidebar-w: 268px; --header-h: 80px; --radius: 10px;
+            --grid-line: rgba(38,196,202,0.025);
+            --modal-bg: #161b1f;
+            --table-hover: rgba(255,255,255,0.025);
+            --btn-close-filter: invert(1);
+            --scrollbar-thumb: #2b3540;
         }
+        :root[data-theme="light"] {
+            --bg-deep: #f0f4f8; --bg-surface: #ffffff; --bg-card: #ffffff; --bg-hover: #e8eef5;
+            --prism-cyan: #0d9ea4; --prism-cyan-dim: rgba(13,158,164,0.1);
+            --prism-red: #e53e3e; --prism-red-dim: rgba(229,62,62,0.08);
+            --prism-green: #2f855a; --prism-amber: #d97706; --prism-purple: #6b46c1;
+            --text-dim: #94a3b8; --text-mid: #64748b; --text-bright: #1e293b;
+            --border: #e2e8f0; --border-mid: #cbd5e1;
+            --grid-line: rgba(13,158,164,0.04);
+            --modal-bg: #ffffff;
+            --table-hover: rgba(0,0,0,0.025);
+            --btn-close-filter: none;
+            --scrollbar-thumb: #cbd5e1;
+        }
+        :root { --sidebar-w: 268px; --header-h: 80px; --radius: 10px; }
+
         *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg-deep); color: var(--text-bright); margin: 0; overflow-x: hidden; }
-        body::before {
-            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-            background-image: linear-gradient(rgba(38,196,202,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(38,196,202,0.025) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
+        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg-deep); color: var(--text-bright); margin: 0; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+        body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 40px 40px; }
+
         /* Sidebar */
-        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; top:0; left:0; background: var(--bg-surface); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; display: flex; flex-direction: column; }
+        .prism-sidebar { width: var(--sidebar-w); height: 100vh; position: fixed; top:0; left:0; background: var(--bg-surface); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; display: flex; flex-direction: column; transition: background 0.3s, border-color 0.3s; }
         .sidebar-logo { padding: 1.8rem 1.6rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
         .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--prism-cyan), #1a9fa5); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #000; flex-shrink: 0; }
         .logo-text { font-size: 1.2rem; font-weight: 700; letter-spacing: 2px; }
@@ -40,9 +58,12 @@
         .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 60%; background: var(--prism-cyan); border-radius: 0 3px 3px 0; }
         .sidebar-footer { padding: 1rem 1.6rem; border-top: 1px solid var(--border); font-size: 0.68rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
         .sidebar-footer span { color: var(--prism-cyan); }
+
         /* Main */
         .prism-viewport { margin-left: var(--sidebar-w); min-height: 100vh; position: relative; z-index: 1; }
-        .prism-header { position: sticky; top: 0; background: rgba(10,12,14,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2.6rem; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; z-index: 50; }
+        .prism-header { position: sticky; top: 0; backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2.6rem; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; z-index: 50; transition: background 0.3s, border-color 0.3s; }
+        [data-theme="dark"] .prism-header { background: rgba(10,12,14,0.92); }
+        [data-theme="light"] .prism-header { background: rgba(240,244,248,0.92); }
         .header-left h2 { font-size: 1.1rem; font-weight: 700; margin: 0; letter-spacing: 0.5px; }
         .header-status { font-size: 0.7rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
         .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; background: var(--prism-green); box-shadow: 0 0 6px var(--prism-green); animation: pulseDot 2s ease-in-out infinite; }
@@ -52,6 +73,7 @@
         .notif-btn { position: relative; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-mid); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; font-size: 1.1rem; }
         .notif-btn:hover { border-color: var(--prism-cyan); color: var(--prism-cyan); }
         .notif-count { position: absolute; top: -4px; right: -4px; background: var(--prism-red); color: #fff; font-size: 0.55rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-deep); }
+
         /* Buttons */
         .prism-btn { background: transparent; color: var(--prism-cyan); border: 1px solid rgba(38,196,202,0.3); font-size: 0.75rem; font-weight: 700; padding: 7px 16px; border-radius: 7px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.18s; cursor: pointer; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
         .prism-btn:hover { background: var(--prism-cyan); color: #000; }
@@ -59,9 +81,12 @@
         .prism-btn.withdraw:hover { background: var(--prism-red); color: #fff; }
         .prism-btn.amber { color: var(--prism-amber); border-color: rgba(245,166,35,0.3); }
         .prism-btn.amber:hover { background: var(--prism-amber); color: #000; }
+        .prism-btn.danger { color: var(--prism-red); border-color: rgba(255,92,92,0.3); }
+        .prism-btn.danger:hover { background: var(--prism-red); color: #fff; }
         .prism-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
         .kbd { display: inline-block; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 4px; padding: 1px 5px; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
         .prism-content { padding: 2.2rem 2.6rem; }
+
         /* Search bar */
         .search-bar-wrap { display: flex; gap: 8px; margin-bottom: 1.4rem; align-items: center; flex-wrap: wrap; }
         .search-input-wrap { position: relative; flex: 1; max-width: 340px; }
@@ -72,6 +97,7 @@
         .filter-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-mid); padding: 7px 13px; border-radius: 7px; font-size: 0.77rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
         .filter-btn:hover, .filter-btn.active-filter { border-color: var(--prism-cyan); color: var(--prism-cyan); background: var(--prism-cyan-dim); }
         .results-count { font-size: 0.73rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+
         /* Cards */
         .unit-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease; animation: cardIn 0.3s ease forwards; opacity: 0; }
         @keyframes cardIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
@@ -79,6 +105,7 @@
         .unit-card.soldout { border-color: rgba(255,92,92,0.28); background: rgba(255,92,92,0.03); }
         .unit-card.low-stock { border-color: rgba(245,166,35,0.22); }
         .unit-card.soldout:hover { transform: none; }
+
         /* LEDs */
         .status-led { width: 9px; height: 9px; border-radius: 50%; margin-right: 16px; flex-shrink: 0; }
         .led-cyan  { background: var(--prism-cyan);  animation: pulseGreen 2.5s ease-in-out infinite; }
@@ -95,17 +122,19 @@
         .cat-gaming      { background: rgba(38,196,202,0.1);   color: var(--prism-cyan);   border: 1px solid rgba(38,196,202,0.18); }
         .cat-wearables   { background: rgba(76,175,136,0.1);   color: var(--prism-green);  border: 1px solid rgba(76,175,136,0.18); }
         .cat-audio       { background: rgba(245,166,35,0.1);   color: var(--prism-amber);  border: 1px solid rgba(245,166,35,0.18); }
-        .cat-default     { background: #111; color: var(--text-dim); border: 1px solid var(--border); }
+        .cat-default     { background: rgba(90,100,114,0.1); color: var(--text-dim); border: 1px solid var(--border); }
         .soldout-tag  { font-size: 0.6rem; background: rgba(255,92,92,0.1); color: var(--prism-red); border: 1px solid rgba(255,92,92,0.28); padding: 2px 7px; border-radius: 4px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
         .lowstock-tag { font-size: 0.6rem; background: rgba(245,166,35,0.08); color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.22); padding: 2px 7px; border-radius: 4px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
         .metric-wrap { display: flex; gap: 2.5rem; }
         .m-head { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px; }
         .m-body { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; }
+
         /* Tx badges */
         .tx-badge { font-size: 0.62rem; font-weight: 700; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
         .tx-in  { background: rgba(76,175,136,0.1);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.22); }
         .tx-out { background: rgba(255,92,92,0.08);  color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.22); }
         .tx-new { background: rgba(38,196,202,0.08); color: var(--prism-cyan);  border: 1px solid rgba(38,196,202,0.22); }
+
         /* Stat cards */
         .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.3rem 1.5rem; transition: border-color 0.2s; position: relative; overflow: hidden; }
         .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; }
@@ -116,22 +145,26 @@
         .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.7rem; font-weight: 700; line-height: 1; }
         .stat-label { font-size: 0.67rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 6px; }
         .stat-icon { position: absolute; right: 1.3rem; top: 50%; transform: translateY(-50%); font-size: 2.3rem; opacity: 0.06; }
+
         /* Stock bar */
         .stock-bar-wrap { width: 100px; }
         .stock-bar-bg { background: var(--border); border-radius: 99px; height: 5px; overflow: hidden; }
         .stock-bar-fill { height: 5px; border-radius: 99px; transition: width 0.5s ease; }
+
         /* Status pills */
         .status-pill { font-size: 0.62rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; white-space: nowrap; }
         .pill-ok  { background: rgba(76,175,136,0.1);  color: var(--prism-green); border: 1px solid rgba(76,175,136,0.22); }
         .pill-low { background: rgba(245,166,35,0.08); color: var(--prism-amber); border: 1px solid rgba(245,166,35,0.22); }
         .pill-out { background: rgba(255,92,92,0.08);  color: var(--prism-red);   border: 1px solid rgba(255,92,92,0.22); }
+
         /* Skeleton */
         .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         .skeleton-card { height: 70px; margin-bottom: 0.8rem; border-radius: var(--radius); }
+
         /* Toasts */
         #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast-item { background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; min-width: 260px; max-width: 340px; font-size: 0.84rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5); animation: toastIn 0.3s ease forwards; position: relative; overflow: hidden; }
+        .toast-item { background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; min-width: 260px; max-width: 340px; font-size: 0.84rem; box-shadow: 0 8px 32px rgba(0,0,0,0.3); animation: toastIn 0.3s ease forwards; position: relative; overflow: hidden; }
         @keyframes toastIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
         @keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(20px)} }
         .toast-item.fade-out { animation: toastOut 0.3s ease forwards; }
@@ -146,30 +179,71 @@
         .toast-error   .toast-bar { background: var(--prism-red); }
         .toast-info    .toast-bar { background: var(--prism-cyan); }
         @keyframes toastBar { from{width:100%} to{width:0} }
+
         /* Scroll to top */
         #scrollTopBtn { position: fixed; bottom: 24px; left: calc(var(--sidebar-w) + 20px); width: 36px; height: 36px; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 8px; color: var(--text-mid); cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 1rem; z-index: 200; transition: all 0.2s; }
         #scrollTopBtn:hover { border-color: var(--prism-cyan); color: var(--prism-cyan); }
+
         /* Tables */
-        .table-dark { --bs-table-bg: transparent; --bs-table-hover-bg: rgba(255,255,255,0.025); }
+        .table-dark { --bs-table-bg: transparent; --bs-table-hover-bg: var(--table-hover); }
+        [data-theme="light"] .table-dark { color: var(--text-bright) !important; }
+        [data-theme="light"] .table-dark tbody tr td { color: var(--text-bright); }
         .table > :not(caption) > * > * { border-color: var(--border) !important; }
         .table thead th { font-size: 0.64rem !important; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; color: var(--text-dim) !important; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border) !important; }
         .table tbody td { padding: 0.82rem 1rem; vertical-align: middle; }
+
         /* Modals */
-        .modal-content { background: var(--bg-card) !important; border: 1px solid var(--border-mid) !important; border-radius: 14px !important; }
+        .modal-content { background: var(--modal-bg) !important; border: 1px solid var(--border-mid) !important; border-radius: 14px !important; color: var(--text-bright) !important; }
         .modal-header { border-bottom: 1px solid var(--border) !important; padding: 1.1rem 1.4rem; }
         .modal-body { padding: 1.3rem 1.4rem; }
         .modal-footer { border-top: 1px solid var(--border) !important; padding: 0.9rem 1.4rem; }
-        .form-control { background: var(--bg-surface) !important; border-color: var(--border-mid) !important; color: var(--text-bright) !important; border-radius: 8px !important; font-family: 'Space Grotesk', sans-serif; font-size: 0.87rem; }
+        .form-control, .form-select { background: var(--bg-surface) !important; border-color: var(--border-mid) !important; color: var(--text-bright) !important; border-radius: 8px !important; font-family: 'Space Grotesk', sans-serif; font-size: 0.87rem; }
         .form-control:focus { border-color: var(--prism-cyan) !important; box-shadow: 0 0 0 2px rgba(38,196,202,0.14) !important; }
         .form-label { font-size: 0.77rem; color: var(--text-mid); font-weight: 600; margin-bottom: 5px; }
+        .btn-close { filter: invert(1); }
+        [data-theme="light"] .btn-close { filter: none; }
+
         /* Empty state */
         .empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--text-dim); }
         .empty-state i { font-size: 2.8rem; margin-bottom: 0.8rem; display: block; }
         .empty-state p { font-size: 0.88rem; }
+
         /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+
+        /* Manage Stock Modal tabs */
+        .manage-type-tabs { display: flex; gap: 8px; margin-bottom: 1.2rem; }
+        .manage-tab { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-mid); cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.82rem; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .manage-tab.active-add  { background: rgba(76,175,136,0.1); color: var(--prism-green); border-color: rgba(76,175,136,0.3); }
+        .manage-tab.active-out  { background: rgba(255,92,92,0.08); color: var(--prism-red);   border-color: rgba(255,92,92,0.3); }
+
+        /* Settings */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        @media (max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+        .settings-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+        .settings-section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--prism-cyan); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 7px; }
+        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
+        .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .settings-row-label { font-size: 0.88rem; font-weight: 500; }
+        .settings-row-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+        .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border-mid); border-radius: 99px; transition: 0.25s; }
+        .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.25s; }
+        .toggle input:checked + .toggle-slider { background: var(--prism-cyan); }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+        .theme-preview { display: flex; gap: 8px; margin-top: 1rem; }
+        .theme-card { flex: 1; border-radius: 8px; padding: 0.8rem; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; font-size: 0.75rem; font-weight: 600; text-align: center; }
+        .theme-card.dark-preview  { background: #161b1f; color: #dde3e8; border-color: #1e2530; }
+        .theme-card.light-preview { background: #f0f4f8; color: #1e293b; border-color: #e2e8f0; }
+        .theme-card.selected { border-color: var(--prism-cyan) !important; box-shadow: 0 0 0 3px var(--prism-cyan-dim); }
+        .settings-info-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1.1rem; font-size: 0.78rem; color: var(--text-mid); line-height: 1.6; }
+
+        /* New-entry hint in Deploy modal */
+        .new-entry-hint { font-size: 0.7rem; margin-top: 4px; color: var(--prism-cyan); display: none; }
+
         /* Print */
         @media print {
             .prism-sidebar, .prism-header, .prism-btn, #scrollTopBtn, #toast-container { display: none !important; }
@@ -183,12 +257,13 @@
 <div id="toast-container"></div>
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="ph ph-arrow-up"></i></button>
 
+<!-- ═══ SIDEBAR ════════════════════════════════════════════ -->
 <aside class="prism-sidebar">
     <div class="sidebar-logo">
-        <div class="logo-icon"><img src="https://i.pinimg.com/736x/81/bb/97/81bb9755fda692554a38385bb279be52.jpg" style="width: 30px; height: auto;" alt="Smaller image"></div>
+        <div class="logo-icon"><img src="https://i.pinimg.com/736x/1d/a7/ca/1da7ca9a422465139f49564da70b4a44.jpg" style="width:30px;height:auto;" alt="Prism"></div>
         <div>
-            <div class="logo-text">PRISM</div>
-            <div class="logo-version">v2.0 · STOCKPRO</div>
+            <div class="logo-text">Miku Stocks</div>
+            <div class="logo-version">v1.0 · MIKU STOCK PRO</div>
         </div>
     </div>
     <div class="sidebar-body">
@@ -202,7 +277,7 @@
             <span class="nav-label">Management</span>
             <a class="nav-item" onclick="loadModule('inventory_overview', this)"><i class="ph ph-chart-bar"></i> Inventory Overview</a>
             <a class="nav-item" onclick="loadModule('suppliers', this)"><i class="ph ph-users-three"></i> Suppliers</a>
-            <a class="nav-item" style="opacity:0.4;cursor:default;"><i class="ph ph-gear"></i> Settings</a>
+            <a class="nav-item" onclick="loadModule('settings', this)"><i class="ph ph-gear"></i> Settings</a>
         </div>
     </div>
     <div class="sidebar-footer">
@@ -211,10 +286,11 @@
     </div>
 </aside>
 
+<!-- ═══ MAIN VIEWPORT ══════════════════════════════════════ -->
 <div class="prism-viewport">
     <div class="prism-header">
         <div class="header-left">
-            <h2 id="module-title">Project Argo: PRODUCTS</h2>
+            <h2 id="module-title">Project: PRODUCTS</h2>
             <div class="header-status">
                 <span class="status-dot" id="status-dot"></span>
                 <span id="api-status">ONLINE</span>
@@ -241,23 +317,42 @@
     </div>
 </div>
 
-<!-- New Product Modal -->
+<!-- ═══ MODAL: Deploy New Product ═════════════════════════ -->
 <div class="modal fade" id="newProductModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" style="color:var(--prism-cyan);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-plus-circle me-2"></i>INITIALIZE NEW ASSET</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3"><label class="form-label">Product Name</label><input type="text" class="form-control" id="f-name" placeholder="e.g. iPhone 16 Pro" autocomplete="off"></div>
+                <div class="mb-3">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="f-name" placeholder="e.g. iPhone 16 Pro" autocomplete="off">
+                </div>
                 <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label">Category</label><input type="text" class="form-control" id="f-category" placeholder="e.g. Smartphones"></div>
-                    <div class="col-md-6"><label class="form-label">Supplier</label><input type="text" class="form-control" id="f-supplier" placeholder="e.g. Apple PH"></div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" id="f-category" placeholder="e.g. Smartphones" list="category-datalist" autocomplete="off">
+                        <datalist id="category-datalist"></datalist>
+                        <div class="new-entry-hint" id="f-cat-hint"><i class="ph ph-sparkle"></i> New category — will be added to database with a new ID</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Supplier</label>
+                        <input type="text" class="form-control" id="f-supplier" placeholder="e.g. Apple PH" list="supplier-datalist" autocomplete="off">
+                        <datalist id="supplier-datalist"></datalist>
+                        <div class="new-entry-hint" id="f-sup-hint"><i class="ph ph-sparkle"></i> New supplier — will be added to database with a new ID</div>
+                    </div>
                 </div>
                 <div class="row g-3 mt-0">
-                    <div class="col-md-6"><label class="form-label">Initial Quantity</label><input type="number" class="form-control" id="f-qty" min="0" placeholder="0" oninput="updateNewCost()"></div>
-                    <div class="col-md-6"><label class="form-label">Unit Price (₱)</label><input type="number" step="0.01" class="form-control" id="f-price" min="0" placeholder="0.00" oninput="updateNewCost()"></div>
+                    <div class="col-md-6">
+                        <label class="form-label">Initial Quantity</label>
+                        <input type="number" class="form-control" id="f-qty" min="0" placeholder="0" oninput="updateNewCost()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Unit Price (₱)</label>
+                        <input type="number" step="0.01" class="form-control" id="f-price" min="0" placeholder="0.00" oninput="updateNewCost()">
+                    </div>
                 </div>
                 <div id="new-cost-preview" style="display:none;margin-top:1rem;padding:10px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:0.81rem;color:var(--text-mid);">
                     Initial stock value: <span id="new-cost-val" style="color:var(--prism-cyan);font-family:'JetBrains Mono',monospace;font-weight:700;"></span>
@@ -271,13 +366,46 @@
     </div>
 </div>
 
-<!-- Restock Calculator Modal -->
+<!-- ═══ MODAL: Manage Stock (replaces browser prompt) ══════ -->
+<div class="modal fade" id="manageStockModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manage-modal-title" style="font-weight:700;font-size:0.9rem;letter-spacing:1px;"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:1.1rem;">
+                    <div style="font-size:0.63rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-bottom:4px;">Target Product</div>
+                    <div id="manage-product-name" style="font-weight:700;font-size:0.97rem;"></div>
+                    <div id="manage-product-meta" style="font-size:0.78rem;color:var(--text-dim);margin-top:2px;"></div>
+                </div>
+                <div class="manage-type-tabs">
+                    <button class="manage-tab active-add" id="mtab-in"  onclick="setManageTab('IN')"><i class="ph ph-plus"></i> Add Stock</button>
+                    <button class="manage-tab"            id="mtab-out" onclick="setManageTab('OUT')"><i class="ph ph-minus"></i> Withdraw</button>
+                </div>
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="manage-qty" min="1" placeholder="Enter quantity…" oninput="updateManageCost()">
+                <div id="manage-cost-preview" style="display:none;margin-top:0.9rem;padding:10px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:0.81rem;color:var(--text-mid);">
+                    <span id="manage-cost-label">Transaction value:</span>
+                    <span id="manage-cost-val" style="font-family:'JetBrains Mono',monospace;font-weight:700;margin-left:6px;"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn" id="manage-confirm-btn" onclick="confirmManageStock()"><i class="ph ph-check me-1"></i>Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: Restock Calculator ═════════════════════════ -->
 <div class="modal fade" id="restockModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" style="color:var(--prism-amber);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-calculator me-2"></i>RESTOCK CALCULATOR</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:1.1rem;">Enter how many units you want to restock. The total cost will be calculated at the current unit price.</p>
@@ -304,22 +432,155 @@
     </div>
 </div>
 
-<script>
-let restockTarget = null;
-let currentModule = 'products';
-let currentNavEl  = null;
-let allProductsCache = [];
+<!-- ═══ MODAL: Delete Product ══════════════════════════════ -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-red);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-trash me-2"></i>DELETE PRODUCT</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Permanently remove this product and all its transaction history?</p>
+                <div style="font-weight:700;font-size:0.97rem;" id="delete-product-name"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="prism-btn" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn danger" onclick="confirmDelete()"><i class="ph ph-trash me-1"></i>Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-// Clock
+<!-- ═══ MODAL: Edit Category ══════════════════════════════ -->
+<div class="modal fade" id="editCatModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-amber);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-pencil me-2"></i>EDIT CATEGORY</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:1.1rem;">
+                    <div style="font-size:0.63rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-bottom:4px;">Category</div>
+                    <div id="edit-cat-name-display" style="font-weight:700;font-size:0.97rem;"></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="edit-cat-desc" rows="3" placeholder="Enter a description for this category…" style="resize:vertical;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn" onclick="confirmEditCat()"><i class="ph ph-floppy-disk me-1"></i>Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: Edit Supplier ═══════════════════════════════ -->
+<div class="modal fade" id="editSupModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-amber);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-pencil me-2"></i>EDIT SUPPLIER CONTACT</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:1.1rem;">
+                    <div style="font-size:0.63rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-bottom:4px;">Supplier</div>
+                    <div id="edit-sup-name-display" style="font-weight:700;font-size:0.97rem;"></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Contact Person</label>
+                    <input type="text" class="form-control" id="edit-sup-contact" placeholder="e.g. Juan dela Cruz" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="prism-btn withdraw" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn" onclick="confirmEditSup()"><i class="ph ph-floppy-disk me-1"></i>Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══ MODAL: Delete Category ══════════════════════════════════════ -->
+<div class="modal fade" id="deleteCatModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-red);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-tag me-2"></i>DELETE CATEGORY</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Delete this category from the database? This only works if no products are currently assigned to it.</p>
+                <div style="font-weight:700;font-size:0.97rem;" id="delete-cat-name"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="prism-btn" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn danger" onclick="confirmDeleteCat()"><i class="ph ph-trash me-1"></i>Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: Delete Supplier ═══════════════════════════════════════ -->
+<div class="modal fade" id="deleteSupModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:var(--prism-red);font-weight:700;font-size:0.9rem;letter-spacing:1px;"><i class="ph ph-users-three me-2"></i>DELETE SUPPLIER</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Delete this supplier from the database? This only works if no products are currently linked to them.</p>
+                <div style="font-weight:700;font-size:0.97rem;" id="delete-sup-name"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="prism-btn" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="prism-btn danger" onclick="confirmDeleteSup()"><i class="ph ph-trash me-1"></i>Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══ JAVASCRIPT ══════════════════════════════════════════ -->
+<script>
+// Restore theme immediately before render to avoid flash
+(function(){
+    const t = localStorage.getItem('prism-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+    const compact = localStorage.getItem('prism-compact') === 'true';
+    if (compact) {
+        const s = document.createElement('style');
+        s.id = 'compact-style';
+        s.textContent = '.unit-card { padding: 0.7rem 1rem !important; }';
+        document.head.appendChild(s);
+    }
+})();
+
+let restockTarget    = null;
+let manageTarget     = null;
+let deleteTarget     = null;
+let manageType       = 'IN';
+let currentModule    = 'products';
+let currentNavEl     = null;
+let allProductsCache = [];
+let knownCategories  = [];
+let knownSuppliers   = [];
+
+// ── Clock ──────────────────────────────────────────────────
 function updateClock() {
     const now = new Date();
-    const d = now.toLocaleDateString('en-PH',{month:'short',day:'numeric'});
-    const t = now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    document.getElementById('live-clock').textContent = d + ' · ' + t;
+    document.getElementById('live-clock').textContent =
+        now.toLocaleDateString('en-PH',{month:'short',day:'numeric'}) + ' · ' +
+        now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 setInterval(updateClock, 1000); updateClock();
 
-// Toast
+// ── Toast ──────────────────────────────────────────────────
 function showToast(msg, type='success') {
     const icons = {success:'ph-check-circle', error:'ph-x-circle', info:'ph-info'};
     const el = document.createElement('div');
@@ -329,28 +590,28 @@ function showToast(msg, type='success') {
     setTimeout(()=>{ el.classList.add('fade-out'); setTimeout(()=>el.remove(),300); }, 3500);
 }
 
-// Scroll to top
+// ── Scroll to top ──────────────────────────────────────────
 window.addEventListener('scroll', ()=>{
     document.getElementById('scrollTopBtn').style.display = window.scrollY > 300 ? 'flex' : 'none';
 });
 
-// Keyboard shortcut: N = new product
+// ── Keyboard shortcut: N = new product ────────────────────
 document.addEventListener('keydown', e=>{
     if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     if (e.key==='n'||e.key==='N') new bootstrap.Modal(document.getElementById('newProductModal')).show();
 });
 
-// Status dot
+// ── Status dot ────────────────────────────────────────────
 function setStatus(state) {
     const dot = document.getElementById('status-dot');
     const txt = document.getElementById('api-status');
     txt.innerText = state;
-    const colors = {ONLINE:'var(--prism-green)', 'PROCESSING...':'var(--prism-amber)', 'BRIDGE FAILED':'var(--prism-red)', 'POLLING API...':'var(--prism-amber)', 'UPLOADING...':'var(--prism-amber)'};
+    const colors = {ONLINE:'var(--prism-green)','PROCESSING...':'var(--prism-amber)','BRIDGE FAILED':'var(--prism-red)','POLLING API...':'var(--prism-amber)','UPLOADING...':'var(--prism-amber)'};
     const c = colors[state] || 'var(--prism-amber)';
     dot.style.background = c; dot.style.boxShadow = '0 0 6px '+c;
 }
 
-// Notification badge
+// ── Notification badge ─────────────────────────────────────
 function updateNotifBadge(data) {
     const count = data.filter(r=>parseInt(r.Stock_qty)<=9).length;
     const el = document.getElementById('notif-count');
@@ -358,12 +619,12 @@ function updateNotifBadge(data) {
     else el.style.display='none';
 }
 
-// Skeleton
+// ── Skeleton ──────────────────────────────────────────────
 function showSkeleton(n=4) {
     document.getElementById('prismContainer').innerHTML = Array(n).fill('<div class="skeleton skeleton-card"></div>').join('');
 }
 
-// Category color class
+// ── Category color class ───────────────────────────────────
 function catClass(name) {
     if (!name) return 'cat-default';
     const n = name.toLowerCase();
@@ -374,14 +635,53 @@ function catClass(name) {
     return 'cat-default';
 }
 
-// Module loader
+// ── Load categories + suppliers into datalists ─────────────
+async function loadDropdownData() {
+    try {
+        const [catRes, supRes] = await Promise.all([
+            fetch('api.php?action=categories'),
+            fetch('api.php?action=suppliers')
+        ]);
+        knownCategories = await catRes.json();
+        knownSuppliers  = await supRes.json();
+
+        const catList = document.getElementById('category-datalist');
+        catList.innerHTML = knownCategories.map(c=>`<option value="${c.Category_name}">`).join('');
+
+        const supList = document.getElementById('supplier-datalist');
+        supList.innerHTML = knownSuppliers.map(s=>`<option value="${s.supplier_name}">`).join('');
+    } catch(e) { /* hints just won't show */ }
+}
+
+// Show hint when user types a brand-new category or supplier
+document.addEventListener('input', e=>{
+    if (e.target.id === 'f-category') {
+        const val = e.target.value.trim();
+        const isNew = val && !knownCategories.some(c=>c.Category_name.toLowerCase()===val.toLowerCase());
+        document.getElementById('f-cat-hint').style.display = isNew ? 'block' : 'none';
+    }
+    if (e.target.id === 'f-supplier') {
+        const val = e.target.value.trim();
+        const isNew = val && !knownSuppliers.some(s=>s.supplier_name.toLowerCase()===val.toLowerCase());
+        document.getElementById('f-sup-hint').style.display = isNew ? 'block' : 'none';
+    }
+});
+
+// ── Module loader ──────────────────────────────────────────
 async function loadModule(action, element) {
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     if (element) element.classList.add('active');
     currentModule = action; currentNavEl = element;
-    const titleMap = {products:'PRODUCTS',categories:'CATEGORIES',transactions:'TRANSACTIONS',suppliers:'SUPPLIERS',inventory_overview:'INVENTORY OVERVIEW'};
-    document.getElementById('module-title').innerText = 'Project Argo: '+(titleMap[action]||action.toUpperCase());
+    const titleMap = {products:'PRODUCTS',categories:'CATEGORIES',transactions:'TRANSACTIONS',suppliers:'SUPPLIERS',inventory_overview:'INVENTORY OVERVIEW',settings:'SETTINGS'};
+    document.getElementById('module-title').innerText = 'Project: '+(titleMap[action]||action.toUpperCase());
     document.getElementById('record-count').innerText = '';
+
+    if (action === 'settings') {
+        document.getElementById('prismContainer').innerHTML = '';
+        renderSettings();
+        return;
+    }
+
     setStatus('POLLING API...');
     showSkeleton(action==='inventory_overview'?2:4);
     try {
@@ -390,10 +690,10 @@ async function loadModule(action, element) {
         if (data.error) throw new Error(data.error);
         document.getElementById('record-count').innerText = data.length+' record'+(data.length!==1?'s':'');
         document.getElementById('prismContainer').innerHTML = '';
-        if      (action==='products')           { allProductsCache=data; updateNotifBadge(data); renderProductsWithSearch(data); }
-        else if (action==='transactions')        renderTransactions(data);
-        else if (action==='inventory_overview')  renderInventoryOverview(data);
-        else                                     renderTable(data);
+        if      (action==='products')          { allProductsCache=data; updateNotifBadge(data); renderProductsWithSearch(data); }
+        else if (action==='transactions')       renderTransactions(data);
+        else if (action==='inventory_overview') renderInventoryOverview(data);
+        else                                    renderTable(data);
         setStatus('ONLINE');
     } catch(err) {
         setStatus('BRIDGE FAILED');
@@ -401,24 +701,67 @@ async function loadModule(action, element) {
     }
 }
 
-// Stock management
-async function manage(type, id) {
-    const label = type==='IN'?'Add':'Withdraw';
-    const qty = prompt('Enter quantity to '+label+':');
-    if (!qty||isNaN(qty)||qty<=0) return;
+// ── Manage Stock Modal ─────────────────────────────────────
+function manage(type, id, name, price, stock) {
+    manageTarget = {id, name, price:parseFloat(price)||0, stock:parseInt(stock)||0};
+    document.getElementById('manage-product-name').innerText = name;
+    document.getElementById('manage-product-meta').innerText = 'Unit price: ₱'+parseFloat(price).toLocaleString()+' · In stock: '+stock;
+    document.getElementById('manage-qty').value = '';
+    document.getElementById('manage-cost-preview').style.display = 'none';
+    setManageTab(type);
+    new bootstrap.Modal(document.getElementById('manageStockModal')).show();
+}
+
+function setManageTab(type) {
+    manageType = type;
+    document.getElementById('mtab-in').className  = 'manage-tab'+(type==='IN' ?' active-add':'');
+    document.getElementById('mtab-out').className = 'manage-tab'+(type==='OUT'?' active-out':'');
+    const confirmBtn = document.getElementById('manage-confirm-btn');
+    const title = document.getElementById('manage-modal-title');
+    if (type==='IN') {
+        title.innerHTML = '<i class="ph ph-plus-circle me-2" style="color:var(--prism-green)"></i><span style="color:var(--prism-green)">ADD STOCK</span>';
+        confirmBtn.classList.remove('withdraw');
+        document.getElementById('manage-cost-label').textContent = 'Transaction value (cost):';
+    } else {
+        title.innerHTML = '<i class="ph ph-minus-circle me-2" style="color:var(--prism-red)"></i><span style="color:var(--prism-red)">WITHDRAW STOCK</span>';
+        confirmBtn.classList.add('withdraw');
+        document.getElementById('manage-cost-label').textContent = 'Transaction value (deducted):';
+    }
+    updateManageCost();
+}
+
+function updateManageCost() {
+    const qty   = parseFloat(document.getElementById('manage-qty').value)||0;
+    const price = manageTarget?.price||0;
+    const preview = document.getElementById('manage-cost-preview');
+    if (qty>0&&price>0) {
+        preview.style.display = 'block';
+        document.getElementById('manage-cost-val').style.color = manageType==='IN'?'var(--prism-green)':'var(--prism-red)';
+        document.getElementById('manage-cost-val').textContent = '₱'+(qty*price).toLocaleString('en-PH',{minimumFractionDigits:2});
+    } else { preview.style.display='none'; }
+}
+
+async function confirmManageStock() {
+    if (!manageTarget) return;
+    const rawQty = document.getElementById('manage-qty').value.trim();
+    const qty = parseInt(rawQty, 10);
+    if (!rawQty||isNaN(qty)||qty<=0) { showToast('Please enter a valid quantity greater than 0.','error'); return; }
     setStatus('PROCESSING...');
+    const fd = new FormData();
+    fd.append('action','manage_stock'); fd.append('Product_id',manageTarget.id);
+    fd.append('Transaction_qty',qty); fd.append('Transaction_type',manageType);
     try {
-        const fd = new FormData();
-        fd.append('action','manage_stock'); fd.append('Product_id',id);
-        fd.append('Transaction_qty',qty); fd.append('Transaction_type',type);
         const res = await fetch('process.php',{method:'POST',body:fd});
         const result = await res.json();
-        if (result.status==='success') { showToast(label+' of '+qty+' unit(s) recorded.','success'); loadModule('products',document.querySelector('.nav-item.active')); }
-        else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+        if (result.status==='success') {
+            bootstrap.Modal.getInstance(document.getElementById('manageStockModal')).hide();
+            showToast((manageType==='IN'?'Added':'Withdrew')+' '+qty+' unit(s) of "'+manageTarget.name+'".','success');
+            loadModule('products', document.querySelector('.nav-item.active'));
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
     } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
 }
 
-// New cost preview
+// ── New cost preview ───────────────────────────────────────
 function updateNewCost() {
     const q = parseFloat(document.getElementById('f-qty').value)||0;
     const p = parseFloat(document.getElementById('f-price').value)||0;
@@ -427,34 +770,40 @@ function updateNewCost() {
     else preview.style.display='none';
 }
 
-// Submit new product
+// ── Submit new product ─────────────────────────────────────
 async function submitNewProduct() {
-    const name=document.getElementById('f-name').value.trim();
-    const category=document.getElementById('f-category').value.trim();
-    const supplier=document.getElementById('f-supplier').value.trim();
-    const qty=document.getElementById('f-qty').value;
-    const price=document.getElementById('f-price').value;
+    const name     = document.getElementById('f-name').value.trim();
+    const category = document.getElementById('f-category').value.trim();
+    const supplier = document.getElementById('f-supplier').value.trim();
+    const qty      = document.getElementById('f-qty').value;
+    const price    = document.getElementById('f-price').value;
     if (!name||!category||!supplier||qty===''||price==='') { showToast('Please fill in all fields.','error'); return; }
+
     setStatus('UPLOADING...');
-    const fd=new FormData();
+    const fd = new FormData();
     fd.append('action','create_product'); fd.append('product_name',name);
     fd.append('category_name',category); fd.append('supplier_name',supplier);
     fd.append('quantity',qty); fd.append('price',price);
     try {
-        const res=await fetch('process.php',{method:'POST',body:fd});
-        const result=await res.json();
+        const res    = await fetch('process.php',{method:'POST',body:fd});
+        const result = await res.json();
         if (result.status==='success') {
-            const m=bootstrap.Modal.getInstance(document.getElementById('newProductModal'))||new bootstrap.Modal(document.getElementById('newProductModal'));
+            const m = bootstrap.Modal.getInstance(document.getElementById('newProductModal'))||new bootstrap.Modal(document.getElementById('newProductModal'));
             m.hide();
             ['f-name','f-category','f-supplier','f-qty','f-price'].forEach(i=>document.getElementById(i).value='');
             document.getElementById('new-cost-preview').style.display='none';
-            showToast('"'+name+'" deployed successfully.','success');
-            loadModule('products',document.querySelector('.nav-item.active'));
+            document.getElementById('f-cat-hint').style.display='none';
+            document.getElementById('f-sup-hint').style.display='none';
+
+            let msg = '"'+name+'" deployed (ID: #'+result.product_id+').';
+            showToast(msg,'success');
+            loadDropdownData(); // refresh datalists with any new entries
+            loadModule('products', document.querySelector('.nav-item.active'));
         } else { showToast('Database Error: '+result.error,'error'); setStatus('ONLINE'); }
     } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
 }
 
-// Restock modal
+// ── Restock modal ──────────────────────────────────────────
 function openRestockModal(id, name, price) {
     restockTarget={id,name,price};
     document.getElementById('rc-product-name').innerText=name;
@@ -465,15 +814,12 @@ function openRestockModal(id, name, price) {
     document.getElementById('rc-breakdown').innerText='';
     new bootstrap.Modal(document.getElementById('restockModal')).show();
 }
-
 function calcRestock() {
     const qty=parseFloat(document.getElementById('rc-qty').value)||0;
     const price=parseFloat(document.getElementById('rc-price').value)||0;
-    const total=qty*price;
-    document.getElementById('rc-total').innerText='₱'+total.toLocaleString('en-PH',{minimumFractionDigits:2});
+    document.getElementById('rc-total').innerText='₱'+(qty*price).toLocaleString('en-PH',{minimumFractionDigits:2});
     document.getElementById('rc-breakdown').innerText=(qty>0&&price>0)?qty+' units × ₱'+price.toLocaleString()+' per unit':'';
 }
-
 async function confirmRestock() {
     if (!restockTarget) return;
     const rawQty=document.getElementById('rc-qty').value.trim();
@@ -494,7 +840,30 @@ async function confirmRestock() {
     } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
 }
 
-// Products with search/filter
+// ── Delete product ─────────────────────────────────────────
+function openDeleteModal(id, name) {
+    deleteTarget = {id, name};
+    document.getElementById('delete-product-name').innerText = name;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+async function confirmDelete() {
+    if (!deleteTarget) return;
+    setStatus('PROCESSING...');
+    const fd=new FormData();
+    fd.append('action','delete_product');
+    fd.append('Product_id', deleteTarget.id);
+    try {
+        const res=await fetch('process.php',{method:'POST',body:fd});
+        const result=await res.json();
+        if (result.status==='success') {
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            showToast('"'+deleteTarget.name+'" has been deleted.','info');
+            loadModule('products', document.querySelector('.nav-item.active'));
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
+}
+
+// ── Products with search/filter ────────────────────────────
 function renderProductsWithSearch(data) {
     const container=document.getElementById('prismContainer');
     container.innerHTML='';
@@ -513,16 +882,11 @@ function renderProductsWithSearch(data) {
     window._productFilter='all';
     renderProductList(data);
 }
-
 function setFilter(f) {
     window._productFilter=f;
-    ['all','ok','low','out'].forEach(k=>{
-        const el=document.getElementById('filter-'+k);
-        if(el) el.classList.toggle('active-filter',k===f);
-    });
+    ['all','ok','low','out'].forEach(k=>{ const el=document.getElementById('filter-'+k); if(el) el.classList.toggle('active-filter',k===f); });
     filterProducts();
 }
-
 function filterProducts() {
     const q=(document.getElementById('product-search')?.value||'').toLowerCase();
     const f=window._productFilter||'all';
@@ -535,43 +899,45 @@ function filterProducts() {
     document.getElementById('product-count').textContent=filtered.length+' product'+(filtered.length!==1?'s':'');
     renderProductList(filtered);
 }
-
 function renderProductList(data) {
     const list=document.getElementById('product-list');
     if (!list) return;
     if (!data||data.length===0) { list.innerHTML='<div class="empty-state"><i class="ph ph-magnifying-glass"></i><p>No products match your search.</p></div>'; return; }
     list.innerHTML=data.map((item,idx)=>{
         const qty=parseInt(item.Stock_qty);
-        const soldOut=qty===0, lowStock=qty>0&&qty<10;
+        const soldOut=qty===0,lowStock=qty>0&&qty<10;
         const ledClass=soldOut?'led-gray':lowStock?'led-amber':'led-cyan';
         const cardClass=soldOut?'soldout':lowStock?'low-stock':'';
         const cc=catClass(item.Category_name);
         const extraTag=soldOut?'<span class="soldout-tag"><i class="ph ph-x-circle"></i> Sold Out</span>':lowStock?'<span class="lowstock-tag"><i class="ph ph-warning"></i> Low Stock</span>':'';
+        const nameEsc=item.product_name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         return '<div class="unit-card '+cardClass+'" style="animation-delay:'+idx*0.04+'s">'+
             '<div class="d-flex align-items-center" style="min-width:200px"><div class="status-led '+ledClass+'"></div>'+
             '<div class="unit-identity"><div class="unit-title">'+item.product_name+' '+extraTag+'</div>'+
             '<span class="unit-badge '+cc+'">'+(item.Category_name||'General')+'</span></div></div>'+
             '<div class="metric-wrap">'+
-            '<div><div class="m-head">Revision</div><div class="m-body">P00'+item.Product_id+'</div></div>'+
-            '<div><div class="m-head">Objects</div><div class="m-body fw-bold'+(soldOut?' text-danger':'')+'" style="'+(lowStock?'color:var(--prism-amber)':'')+'">'+qty+'</div></div>'+
+            '<div><div class="m-head">ID</div><div class="m-body">P'+String(item.Product_id).padStart(4,'0')+'</div></div>'+
+            '<div><div class="m-head">Qty</div><div class="m-body fw-bold'+(soldOut?' text-danger':'')+'" style="'+(lowStock?'color:var(--prism-amber)':'')+'">'+qty+'</div></div>'+
             '<div><div class="m-head">Supplier</div><div class="m-body" style="font-size:0.8rem">'+(item.supplier_name||'—')+'</div></div>'+
             '<div><div class="m-head">Unit Price</div><div class="m-body">₱'+parseFloat(item.Unit_price).toLocaleString()+'</div></div>'+
             '</div>'+
             '<div class="d-flex gap-2 align-items-center">'+
-            '<button class="prism-btn" onclick="manage(\'IN\','+item.Product_id+')"><i class="ph ph-plus me-1"></i>Add</button>'+
-            '<button class="prism-btn withdraw" onclick="manage(\'OUT\','+item.Product_id+')"'+(soldOut?' disabled':'')+'>'+
-            '<i class="ph ph-minus me-1"></i>Withdraw</button></div></div>';
+            '<button class="prism-btn" onclick="manage(\'IN\','+item.Product_id+',\''+nameEsc+'\','+item.Unit_price+','+qty+')"><i class="ph ph-plus me-1"></i>Add</button>'+
+            '<button class="prism-btn withdraw" onclick="manage(\'OUT\','+item.Product_id+',\''+nameEsc+'\','+item.Unit_price+','+qty+')"'+(soldOut?' disabled':'')+'>'+
+            '<i class="ph ph-minus me-1"></i>Withdraw</button>'+
+            '<button class="prism-btn danger" style="padding:7px 10px;" title="Delete product" onclick="openDeleteModal('+item.Product_id+',\''+nameEsc+'\')"><i class="ph ph-trash"></i></button>'+
+            '</div></div>';
     }).join('');
 }
 
-// Animated counter
-function animateCount(el, target) {
+// ── Animated counter ───────────────────────────────────────
+function animateCount(el,target) {
     if (!el) return;
-    const dur=600, step=(ts,s)=>{ if(!s)s=ts; const p=Math.min((ts-s)/dur,1); el.textContent=Math.floor(p*target).toLocaleString(); if(p<1)requestAnimationFrame(ts=>step(ts,s)); else el.textContent=target.toLocaleString(); };
+    const dur=600,step=(ts,s)=>{ if(!s)s=ts; const p=Math.min((ts-s)/dur,1); el.textContent=Math.floor(p*target).toLocaleString(); if(p<1)requestAnimationFrame(ts=>step(ts,s)); else el.textContent=target.toLocaleString(); };
     requestAnimationFrame(ts=>step(ts));
 }
 
-// Inventory overview
+// ── Inventory overview ─────────────────────────────────────
 function renderInventoryOverview(data) {
     const container=document.getElementById('prismContainer');
     container.innerHTML='';
@@ -619,7 +985,7 @@ function renderInventoryOverview(data) {
     },50);
 }
 
-// Transactions
+// ── Transactions ───────────────────────────────────────────
 function renderTransactions(data) {
     const container=document.getElementById('prismContainer');
     if (!data||data.length===0) { container.innerHTML='<div class="empty-state"><i class="ph ph-arrows-left-right"></i><p>No transactions recorded yet.</p></div>'; return; }
@@ -641,7 +1007,6 @@ function renderTransactions(data) {
     html+='</tbody></table></div>';
     container.innerHTML+=html;
 }
-
 function exportTransactions() {
     const data=window._txData; if(!data) return;
     const headers=['ID','Product','Type','Quantity','Date'];
@@ -654,19 +1019,267 @@ function exportTransactions() {
     showToast('Transactions exported as CSV.','info');
 }
 
-// Generic table
+// ── Generic table ──────────────────────────────────────────
 function renderTable(data) {
     const container=document.getElementById('prismContainer');
     if (!data||data.length===0) { container.innerHTML='<div class="empty-state"><i class="ph ph-table"></i><p>No records found in this sector.</p></div>'; return; }
+
+    const isCat = currentModule === 'categories';
+    const isSup = currentModule === 'suppliers';
+    const hasActions = isCat || isSup;
+
     let html='<div class="table-responsive"><table class="table table-dark table-hover"><thead><tr>';
     Object.keys(data[0]).forEach(k=>{ html+='<th>'+k.replace(/_/g,' ')+'</th>'; });
+    if (hasActions) html += '<th>Actions</th>';
     html+='</tr></thead><tbody>';
-    data.forEach(row=>{ html+='<tr>'; Object.values(row).forEach(val=>{ html+='<td class="m-body">'+(val??'—')+'</td>'; }); html+='</tr>'; });
+
+    data.forEach(row=>{
+        html+='<tr>';
+        Object.values(row).forEach(val=>{ html+='<td class="m-body">'+(val??'\u2014')+'</td>'; });
+        if (isCat) {
+            const n = String(row.Category_name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+            const d = String(row.Description||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+            html += '<td style="white-space:nowrap">'
+                  + '<button class="prism-btn amber" style="font-size:0.67rem;padding:5px 10px;margin-right:4px;" onclick="openEditCatModal(\''+n+'\',\''+d+'\')"><i class="ph ph-pencil me-1"></i>Edit</button>'
+                  + '<button class="prism-btn danger" style="font-size:0.67rem;padding:5px 10px;" onclick="openDeleteCatModal(\''+n+'\')"><i class="ph ph-trash me-1"></i>Delete</button>'
+                  + '</td>';
+        }
+        if (isSup) {
+            const n = String(row.supplier_name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+            const c = String(row.supply_contact||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+            html += '<td style="white-space:nowrap">'
+                  + '<button class="prism-btn amber" style="font-size:0.67rem;padding:5px 10px;margin-right:4px;" onclick="openEditSupModal('+row.Supplier_id+',\''+n+'\',\''+c+'\')"><i class="ph ph-pencil me-1"></i>Edit</button>'
+                  + '<button class="prism-btn danger" style="font-size:0.67rem;padding:5px 10px;" onclick="openDeleteSupModal('+row.Supplier_id+',\''+n+'\')"><i class="ph ph-trash me-1"></i>Delete</button>'
+                  + '</td>';
+        }
+        html+='</tr>';
+    });
     html+='</tbody></table></div>';
-    container.innerHTML=html;
+
+    if (hasActions) {
+        const hint = isCat
+            ? '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.8rem;"><i class="ph ph-info me-1"></i>You can edit descriptions here. Categories can only be deleted when no products belong to them.</div>'
+            : '<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.8rem;"><i class="ph ph-info me-1"></i>You can edit contact details here. Suppliers can only be deleted when no products are linked to them.</div>';
+        container.innerHTML = hint + html;
+    } else {
+        container.innerHTML = html;
+    }
 }
 
-window.onload = () => { setFilter('all'); loadModule('products', document.querySelector('.nav-item.active')); };
+
+// ── Edit Category ──────────────────────────────────────────
+let editCatTarget = null;
+function openEditCatModal(name, desc) {
+    editCatTarget = name;
+    document.getElementById('edit-cat-name-display').innerText  = name;
+    document.getElementById('edit-cat-desc').value = desc || '';
+    new bootstrap.Modal(document.getElementById('editCatModal')).show();
+}
+async function confirmEditCat() {
+    if (!editCatTarget) return;
+    const desc = document.getElementById('edit-cat-desc').value.trim();
+    setStatus('PROCESSING...');
+    const fd = new FormData();
+    fd.append('action','update_category');
+    fd.append('Category_name', editCatTarget);
+    fd.append('Description', desc);
+    try {
+        const res    = await fetch('process.php',{method:'POST',body:fd});
+        const result = await res.json();
+        if (result.status==='success') {
+            bootstrap.Modal.getInstance(document.getElementById('editCatModal')).hide();
+            showToast('Category "'+editCatTarget+'" updated.','success');
+            loadModule('categories', document.querySelector('.nav-item.active'));
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
+}
+
+// ── Edit Supplier ──────────────────────────────────────────
+let editSupTarget = null;
+function openEditSupModal(id, name, contact) {
+    editSupTarget = {id, name};
+    document.getElementById('edit-sup-name-display').innerText  = name;
+    document.getElementById('edit-sup-contact').value = contact || '';
+    new bootstrap.Modal(document.getElementById('editSupModal')).show();
+}
+async function confirmEditSup() {
+    if (!editSupTarget) return;
+    const contact = document.getElementById('edit-sup-contact').value.trim();
+    setStatus('PROCESSING...');
+    const fd = new FormData();
+    fd.append('action','update_supplier');
+    fd.append('Supplier_id', editSupTarget.id);
+    fd.append('supply_contact', contact);
+    try {
+        const res    = await fetch('process.php',{method:'POST',body:fd});
+        const result = await res.json();
+        if (result.status==='success') {
+            bootstrap.Modal.getInstance(document.getElementById('editSupModal')).hide();
+            showToast('Supplier "'+editSupTarget.name+'" contact updated.','success');
+            loadModule('suppliers', document.querySelector('.nav-item.active'));
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
+}
+
+let deleteCatTarget = null;
+function openDeleteCatModal(name) {
+    deleteCatTarget = name;
+    document.getElementById('delete-cat-name').innerText = name;
+    new bootstrap.Modal(document.getElementById('deleteCatModal')).show();
+}
+async function confirmDeleteCat() {
+    if (!deleteCatTarget) return;
+    setStatus('PROCESSING...');
+    const fd = new FormData();
+    fd.append('action','delete_category');
+    fd.append('Category_name', deleteCatTarget);
+    try {
+        const res    = await fetch('process.php',{method:'POST',body:fd});
+        const result = await res.json();
+        if (result.status==='success') {
+            bootstrap.Modal.getInstance(document.getElementById('deleteCatModal')).hide();
+            showToast('Category "'+deleteCatTarget+'" deleted.','info');
+            loadDropdownData();
+            loadModule('categories', document.querySelector('.nav-item.active'));
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
+}
+
+// \u2500\u2500 Delete Supplier \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+let deleteSupTarget = null;
+function openDeleteSupModal(id, name) {
+    deleteSupTarget = {id, name};
+    document.getElementById('delete-sup-name').innerText = name;
+    new bootstrap.Modal(document.getElementById('deleteSupModal')).show();
+}
+async function confirmDeleteSup() {
+    if (!deleteSupTarget) return;
+    setStatus('PROCESSING...');
+    const fd = new FormData();
+    fd.append('action','delete_supplier');
+    fd.append('Supplier_id', deleteSupTarget.id);
+    try {
+        const res    = await fetch('process.php',{method:'POST',body:fd});
+        const result = await res.json();
+        if (result.status==='success') {
+            bootstrap.Modal.getInstance(document.getElementById('deleteSupModal')).hide();
+            showToast('Supplier "'+deleteSupTarget.name+'" deleted.','info');
+            loadDropdownData();
+            loadModule('suppliers', document.querySelector('.nav-item.active'));
+        } else { showToast('Error: '+result.error,'error'); setStatus('ONLINE'); }
+    } catch { showToast('Bridge Failed: Could not reach process.php','error'); setStatus('BRIDGE FAILED'); }
+}
+// ── Settings page ──────────────────────────────────────────
+function renderSettings() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const compact = localStorage.getItem('prism-compact') === 'true';
+    document.getElementById('prismContainer').innerHTML = `
+    <div class="settings-grid">
+
+        <!-- Appearance: full-width row -->
+        <div class="settings-section" style="grid-column:1/-1">
+            <div class="settings-section-title"><i class="ph ph-paint-brush"></i> Appearance</div>
+            <div class="settings-row">
+                <div style="flex:1">
+                    <div class="settings-row-label">Interface Theme</div>
+                    <div class="settings-row-sub">Switch between dark (default) and light mode for the entire UI</div>
+                    <div class="theme-preview">
+                        <div class="theme-card dark-preview ${isDark?'selected':''}" id="theme-dark-card" onclick="applyTheme('dark')">
+                            <i class="ph ph-moon" style="font-size:1.4rem;display:block;margin-bottom:5px;"></i> Dark Mode
+                        </div>
+                        <div class="theme-card light-preview ${!isDark?'selected':''}" id="theme-light-card" onclick="applyTheme('light')">
+                            <i class="ph ph-sun" style="font-size:1.4rem;display:block;margin-bottom:5px;color:#d97706;"></i> Light Mode
+                        </div>
+                    </div>
+                </div>
+                <label class="toggle ms-3" title="Toggle light/dark mode">
+                    <input type="checkbox" id="theme-toggle" ${isDark?'':'checked'} onchange="applyTheme(this.checked?'light':'dark')">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Display options -->
+        <div class="settings-section">
+            <div class="settings-section-title"><i class="ph ph-monitor"></i> Display</div>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Compact Card View</div>
+                    <div class="settings-row-sub">Reduce card padding for a denser product list</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="compact-toggle" ${compact?'checked':''} onchange="applyCompact(this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <div>
+                    <div class="settings-row-label">Low Stock Threshold</div>
+                    <div class="settings-row-sub">Items below this quantity are flagged as Low Stock</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="number" id="low-threshold" value="10" min="1" max="100"
+                        style="width:60px;background:var(--bg-surface);border:1px solid var(--border-mid);color:var(--text-bright);border-radius:6px;padding:4px 8px;font-size:0.82rem;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;">
+                    <span style="font-size:0.72rem;color:var(--text-dim)">units</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System info -->
+        <div class="settings-section">
+            <div class="settings-section-title"><i class="ph ph-database"></i> System Info</div>
+            <div class="settings-info-box">
+                <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 16px;align-items:baseline;">
+                    <span style="color:var(--text-dim);font-size:0.72rem;">System</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.77rem;">Prism StockPro v2.1</span>
+                    <span style="color:var(--text-dim);font-size:0.72rem;">Database</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.77rem;">inventory_db</span>
+                    <span style="color:var(--text-dim);font-size:0.72rem;">Host</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.77rem;">localhost</span>
+                    <span style="color:var(--text-dim);font-size:0.72rem;">Engine</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.77rem;">MariaDB · InnoDB</span>
+                    <span style="color:var(--text-dim);font-size:0.72rem;">PHP</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.77rem;">8.2.x (XAMPP)</span>
+                </div>
+            </div>
+            <div class="settings-row" style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid var(--border);">
+                <div>
+                    <div class="settings-row-label">Force Reload</div>
+                    <div class="settings-row-sub">Refresh all cached product and supplier data</div>
+                </div>
+                <button class="prism-btn amber" onclick="location.reload()" style="font-size:0.72rem;">
+                    <i class="ph ph-arrows-clockwise me-1"></i>Reload
+                </button>
+            </div>
+        </div>
+
+    </div>`;
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('prism-theme', theme);
+    const tog  = document.getElementById('theme-toggle');
+    const dark = document.getElementById('theme-dark-card');
+    const light= document.getElementById('theme-light-card');
+    if (tog)   tog.checked = (theme==='light');
+    if (dark)  dark.classList.toggle('selected', theme==='dark');
+    if (light) light.classList.toggle('selected', theme==='light');
+    showToast('Switched to '+(theme==='light'?'Light':'Dark')+' Mode.','info');
+}
+
+function applyCompact(enabled) {
+    let s = document.getElementById('compact-style');
+    if (!s) { s=document.createElement('style'); s.id='compact-style'; document.head.appendChild(s); }
+    s.textContent = enabled ? '.unit-card { padding: 0.7rem 1rem !important; }' : '';
+    localStorage.setItem('prism-compact', enabled);
+}
+
+window.onload = () => {
+    setFilter('all');
+    loadDropdownData();
+    loadModule('products', document.querySelector('.nav-item.active'));
+};
 </script>
 </body>
 </html>
